@@ -54,7 +54,7 @@ The Excel file should contain the following columns:
 - **Column 5 (Labor Cost)**: The labor cost for the work.
 - **Column 6 (Type)**: The type of work (`K` for key orders, `F` for filter orders, or any other value for general work orders).
 
-![Excel Screenshot](path_to_your_screenshot/report_screenshot.png)
+![Excel Screenshot](resources/screenshots/reportScreenshot.png)
 
 ### HTML Templates
 Each invoice type uses a different HTML template, which includes placeholders for dynamic data. The templates should be structured as follows:
@@ -77,7 +77,7 @@ The program generates a PDF for each work order and saves it to the `invoices` f
 
 Example output:
 
-![PDF Screenshot](path_to_your_screenshot/pdf_output_screenshot.png)
+![PDF Screenshot](resources/screenshots/invoiceScreenshot.png)
 
 ## Folder Structure
 
