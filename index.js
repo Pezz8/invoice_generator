@@ -18,6 +18,11 @@ function replaceTemplatePlaceholders(template, data) {
     .replace("{{totalAmount}}", data.totalAmount);
 }
 
+// Function to check if a file already exists
+function fileExists(filePath) {
+  return fs.existsSync(filePath);
+}
+
 // Function to read the HTML template
 function readTemplate(templatePath) {
   return fs.readFileSync(templatePath, "utf-8");
@@ -83,6 +88,14 @@ readXlsxFile(path, { sheet: "July 24", dateFormat: "MM-DD-YYYY" }).then(
           totalAmount,
         });
         pdfPath = `${__dirname}/invoices/Regatta ${unitNumber} work order invoice ${invoiceNumber}.pdf`;
+      }
+
+      // Check if the file already exists, and skip if it does
+      if (fileExists(pdfPath)) {
+        console.log(
+          `Invoice for Unit ${unitNumber} already exists. Skipping...`
+        );
+        continue; // Skip to the next iteration if the file exists
       }
 
       // Create a new page in Puppeteer for each invoice
