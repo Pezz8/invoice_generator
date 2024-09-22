@@ -69,7 +69,7 @@ readXlsxFile(path, { sheet: "July 24", dateFormat: "MM-DD-YYYY" }).then(
           invoiceNumber,
           totalAmount,
         });
-        pdfPath = `${__dirname}/invoices/Regatta ${unitNumber} key order invoice ${invoiceNumber}.pdf`;
+        pdfPath = `${__dirname}/invoices/Regatta ${unitNumber} Key Order Invoice ${invoiceNumber}.pdf`;
       } else if (type.toUpperCase() == "F") {
         invoiceHTML = replaceTemplatePlaceholders(fTemplate, {
           formattedToday,
@@ -78,7 +78,7 @@ readXlsxFile(path, { sheet: "July 24", dateFormat: "MM-DD-YYYY" }).then(
           invoiceNumber,
           totalAmount,
         });
-        pdfPath = `${__dirname}/invoices/Regatta ${unitNumber} HVAC filter invoice ${invoiceNumber}.pdf`;
+        pdfPath = `${__dirname}/invoices/Regatta ${unitNumber} HVAC Filter Invoice ${invoiceNumber}.pdf`;
       } else {
         invoiceHTML = replaceTemplatePlaceholders(woTemplate, {
           formattedToday,
@@ -87,7 +87,7 @@ readXlsxFile(path, { sheet: "July 24", dateFormat: "MM-DD-YYYY" }).then(
           invoiceNumber,
           totalAmount,
         });
-        pdfPath = `${__dirname}/invoices/Regatta ${unitNumber} work order invoice ${invoiceNumber}.pdf`;
+        pdfPath = `${__dirname}/invoices/Regatta ${unitNumber} Work Order Invoice ${invoiceNumber}.pdf`;
       }
 
       // Check if the file already exists, and skip if it does
