@@ -55,18 +55,8 @@ readXlsxFile(path, { sheet: "July 24", dateFormat: "MM-DD-YYYY" }).then(
 
       const totalAmount = parts + labor;
 
-      if (type.toUpperCase() == "W") {
-        // Replace placeholders in the HTML template
-        invoiceHTML = replaceTemplatePlaceholders(woTemplate, {
-          formattedToday,
-          unitNumber,
-          date,
-          invoiceNumber,
-          totalAmount,
-        });
-        pdfPath = `${__dirname}/invoices/Regatta ${unitNumber} work order invoice ${invoiceNumber}.pdf`;
-      } else if (type.toUpperCase() == "K") {
-        // Replace placeholders in the HTML template
+      // Select correct template and correct path based on the type of charge
+      if (type.toUpperCase() == "K") {
         invoiceHTML = replaceTemplatePlaceholders(kTemplate, {
           formattedToday,
           unitNumber,
@@ -76,7 +66,6 @@ readXlsxFile(path, { sheet: "July 24", dateFormat: "MM-DD-YYYY" }).then(
         });
         pdfPath = `${__dirname}/invoices/Regatta ${unitNumber} key order invoice ${invoiceNumber}.pdf`;
       } else if (type.toUpperCase() == "F") {
-        // Replace placeholders in the HTML template
         invoiceHTML = replaceTemplatePlaceholders(fTemplate, {
           formattedToday,
           unitNumber,
@@ -85,6 +74,15 @@ readXlsxFile(path, { sheet: "July 24", dateFormat: "MM-DD-YYYY" }).then(
           totalAmount,
         });
         pdfPath = `${__dirname}/invoices/Regatta ${unitNumber} HVAC filter invoice ${invoiceNumber}.pdf`;
+      } else {
+        invoiceHTML = replaceTemplatePlaceholders(woTemplate, {
+          formattedToday,
+          unitNumber,
+          date,
+          invoiceNumber,
+          totalAmount,
+        });
+        pdfPath = `${__dirname}/invoices/Regatta ${unitNumber} work order invoice ${invoiceNumber}.pdf`;
       }
 
       // Create a new page in Puppeteer for each invoice
@@ -92,7 +90,6 @@ readXlsxFile(path, { sheet: "July 24", dateFormat: "MM-DD-YYYY" }).then(
       await page.setContent(invoiceHTML);
 
       // Save the PDF to file
-      // pdfPath = `${__dirname}/invoices/Regatta ${unitNumber} work order invoice ${invoiceNumber}.pdf`;
       await page.pdf({
         path: pdfPath,
         format: "LETTER",
