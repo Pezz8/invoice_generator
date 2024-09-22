@@ -1,24 +1,44 @@
 const readXlsxFile = require("read-excel-file/node");
+const puppeteer = require("puppeteer");
 const fs = require("fs");
-const PDFDocument = require("pdfkit");
 const path = `${__dirname}/resources/report.xlsx`;
-// const woTempPath = `${__dirname}/resources/invoices_templates/work_order_temp.html`;
+const templatePath = `${__dirname}/resources/invoices_templates/work_order_temp.html`;
 const today = new Date();
 
 // Function to format a date object to MM-DD-YYYY format
 function formatDate(date) {
-  const day = String(date.getDate()).padStart(2, "0"); // Get day and pad with zero if needed
-  const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed in JS, so add 1
-  const year = date.getFullYear(); // Get full year
-
-  return `${month}/${day}/${year}`; // Return formatted date
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${month}-${day}-${year}`;
 }
 
-readXlsxFile(path, { sheet: "July 24", dateFormat: "MM/DD/YYYY" }).then(
-  (rows) => {
+// Function to replace placeholders in the HTML template with dynamic values
+function replaceTemplatePlaceholders(template, data) {
+  return template
+    .replace("{{formattedToday}}", data.formattedToday)
+    .replace("{{unitNumber}}", data.unitNumber)
+    .replace("{{date}}", data.date)
+    .replace("{{invoiceNumber}}", data.invoiceNumber)
+    .replace("{{totalAmount}}", data.totalAmount);
+}
+
+// Function to read the HTML template
+function readTemplate(templatePath) {
+  return fs.readFileSync(templatePath, "utf-8");
+}
+
+readXlsxFile(path, { sheet: "July 24", dateFormat: "MM-DD-YYYY" }).then(
+  async (rows) => {
     const results = rows.filter((row) => row[0] != null).toSpliced(0, 2);
 
-    results.forEach(async (row, rowIndex) => {
+    // Read the HTML template from file
+    const template = readTemplate(templatePath);
+
+    // Launch Puppeteer once for all invoices
+    const browser = await puppeteer.launch();
+
+    for (const row of results) {
       const formattedToday = formatDate(today);
       const unitNumber = row[0];
       let date = row[1];
@@ -31,44 +51,36 @@ readXlsxFile(path, { sheet: "July 24", dateFormat: "MM/DD/YYYY" }).then(
         date = formatDate(date); // Format date as MM-DD-YYYY
       }
 
+      const totalAmount = parts + labor;
+
+      // Replace placeholders in the HTML template
+      const invoiceHTML = replaceTemplatePlaceholders(template, {
+        formattedToday,
+        unitNumber,
+        date,
+        invoiceNumber,
+        totalAmount,
+      });
+
+      // Create a new page in Puppeteer for each invoice
+      const page = await browser.newPage();
+      await page.setContent(invoiceHTML);
+
       // Save the PDF to file
-      const pdfPath = `${__dirname}/invoices/Regatta ${unitNumber} word order invoice ${invoiceNumber}.pdf`;
-
-      const outputString = `
-
-      12 Museum WAY
-      Cambridge MA  617-722-4004
-
-      ${formattedToday}
-
-      Unit ${unitNumber}
-
-      Dear Resident:
-
-      Attached please find an invoice for a work order that was completed
-      in your unit on ${date} in the amount of $ ${parts + labor}.00.
-
-      Checks or money orders should be payable to Regatta Riverview and can be left at
-      the front desk or mailed to the address above.
-      We do not accept cash or debit/credit cards.
-
-      Owners can also pay the invoice through their on-line CINC account as a one-time
-      payment. The charge will be posted to your account at month end, if paying the
-      invoice sooner the credit will be applied once the charge is posted.
-
-      All invoices are posted to the owner's account.  Any charges that owners want
-      to hold their tenants responsible for are between the owner and the tenant.
-
-      Sincerely,
-      Management Office
-      Regatta Riverview Condominium`;
-
-      const doc = new PDFDocument();
-      doc.pipe(fs.createWriteStream(pdfPath));
-      doc.fontSize(12).text(outputString);
-      doc.end();
+      const pdfPath = `${__dirname}/invoices/Regatta ${unitNumber} work order invoice ${invoiceNumber}.pdf`;
+      await page.pdf({
+        path: pdfPath,
+        format: "LETTER",
+        printBackground: true,
+      });
 
       console.log(`PDF generated: ${pdfPath}`);
-    });
+
+      // Close the page after saving the PDF
+      await page.close();
+    }
+
+    // Close Puppeteer browser after all PDFs are generated
+    await browser.close();
   }
 );
