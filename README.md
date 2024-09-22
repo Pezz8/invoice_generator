@@ -81,6 +81,7 @@ Example output:
 
 ## Folder Structure
 
+```bash
 invoice-automation/
 │
 ├── resources/
@@ -94,6 +95,7 @@ invoice-automation/
 ├── index.js
 ├── package.json
 └── README.md
+```
 
 
 ## Dependencies
