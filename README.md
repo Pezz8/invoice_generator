@@ -35,10 +35,12 @@ This project automates the process of generating customized invoices for differe
    ```
 
 2. **Install dependencies**:
+
    ```bash
    npm install
 
    ```
+
 3. **Place your Excel file and templates**:
 
    - Place your Excel file (`report.xlsx`) in the `resources` folder.
@@ -86,9 +88,9 @@ Each invoice type uses a different HTML template, which includes placeholders fo
 
 The program generates a PDF for each work order and saves it to the `invoices` folder. The naming convention for the PDF files is as follows:
 
-- **Key Order PDF**: `Regatta {unitNumber} key order invoice {invoiceNumber}.pdf`
-- **Filter Order PDF**: `Regatta {unitNumber} HVAC filter invoice {invoiceNumber}.pdf`
-- **Work Order PDF**: `Regatta {unitNumber} work order invoice {invoiceNumber}.pdf`
+- **Key Order PDF**: `Unit {unitNumber} key order invoice {invoiceNumber}.pdf`
+- **Filter Order PDF**: `Unit {unitNumber} HVAC filter invoice {invoiceNumber}.pdf`
+- **Work Order PDF**: `Unit {unitNumber} work order invoice {invoiceNumber}.pdf`
 
 Example output:
 
