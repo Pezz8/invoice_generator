@@ -63,12 +63,7 @@ readXlsxFile(path, { sheet: "July 24", dateFormat: "MM-DD-YYYY" }).then(
     for (const row of results) {
       //const formattedToday = formatDate(today);
       const formattedToday = moment(today).format("MMMM Do YYYY");
-      const unitNumber = row[0];
-      let date = row[1];
-      const invoiceNumber = row[2];
-      const parts = row[3];
-      const labor = row[4];
-      const type = row[5];
+      const [unitNumber, date, invoiceNumber, parts, labor, type] = row;
 
       // Reads date from xlsx file one day short. Adding a day.
       if (date instanceof Date) {
