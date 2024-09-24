@@ -29,7 +29,7 @@ This project automates the process of generating customized invoices for differe
 1. **Clone the repository**:
 
    ```bash
-   git clone https://github.com/yourusername/invoice-automation.git
+   git clone https://github.com/Pezz8/invoice-automation.git
    cd invoice-automation
 
    ```
