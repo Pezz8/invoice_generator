@@ -21,32 +21,34 @@ function replaceTemplatePlaceholders(template, data) {
     .replace("{{totalAmount}}", data.totalAmount);
 }
 
-// Function to check if a file already exists
-function fileExists(filePath) {
-  return fs.existsSync(filePath);
-}
-
 // Function to read the HTML template
 function readTemplate(templatePath) {
   return fs.readFileSync(templatePath, "utf-8");
 }
 
-function getInvoiceAndPath(type, unitNumber, invoiceNumber, templates) {
-  if (type.toUpperCase() == "K") {
-    return {
-      template: templates.kTemplate,
-      pdfPath: `${__dirname}/invoices/Regatta ${unitNumber} Key Order Invoice ${invoiceNumber}.pdf`,
-    };
-  } else if (type.toUpperCase() == "F") {
-    return {
-      template: templates.fTemplate,
-      pdfPath: `${__dirname}/invoices/Regatta ${unitNumber} HVAC Filter Invoice ${invoiceNumber}.pdf`,
-    };
-  } else {
-    return {
-      template: templates.woTemplate,
-      pdfPath: `${__dirname}/invoices/Regatta ${unitNumber} Work Order Invoice ${invoiceNumber}.pdf`,
-    };
+function getPath(unitNumber, invoice, title) {
+  return `${__dirname}/invoices/Regatta ${unitNumber} ${title}  ${invoice}.pdf`;
+}
+
+function getInvoiceAndPath(type, unitNumber, invoice, templates) {
+  switch (type.toUpperCase()) {
+    case "K":
+      return {
+        template: templates.kTemplate,
+        pdfPath: getPath(unitNumber, invoice, "Key Order Invoice"),
+      };
+
+    case "F":
+      return {
+        template: templates.fTemplate,
+        pdfPath: getPath(unitNumber, invoice, "HVAC Filter Invoice"),
+      };
+
+    default:
+      return {
+        template: templates.woTemplate,
+        pdfPath: getPath(unitNumber, invoice, "Work Order Invoice"),
+      };
   }
 }
 
@@ -79,7 +81,7 @@ readXlsxFile(path, { sheet: "July 24", dateFormat: "MM-DD-YYYY" }).then(
       });
 
       // Check if the file already exists, and skip if it does
-      if (fileExists(pdfPath)) {
+      if (fs.existsSync(pdfPath)) {
         continue; // Skip to the next iteration if the file exists
       }
 
