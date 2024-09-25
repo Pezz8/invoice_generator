@@ -6,7 +6,10 @@ const path = `${__dirname}/resources/report.xlsx`;
 const woTemplatePath = `${__dirname}/resources/invoices_templates/work_order_temp.html`;
 const kTemplatePath = `${__dirname}/resources/invoices_templates/key_order_temp.html`;
 const fTemplatePath = `${__dirname}/resources/invoices_templates/filter_order_temp.html`;
-const today = new Date();
+const woTemplate = readTemplate(woTemplatePath);
+const kTemplate = readTemplate(kTemplatePath);
+const fTemplate = readTemplate(fTemplatePath);
+const templates = { woTemplate, kTemplate, fTemplate };
 
 // Function to replace placeholders in the HTML template with dynamic values
 function replaceTemplatePlaceholders(template, data) {
@@ -51,26 +54,13 @@ readXlsxFile(path, { sheet: "July 24", dateFormat: "MM-DD-YYYY" }).then(
   async (rows) => {
     const results = rows.filter((row) => row[0] != null)?.toSpliced(0, 2);
 
-    // Read the HTML template from file
-    const woTemplate = readTemplate(woTemplatePath);
-    const kTemplate = readTemplate(kTemplatePath);
-    const fTemplate = readTemplate(fTemplatePath);
-    const templates = { woTemplate, kTemplate, fTemplate };
-
     // Launch Puppeteer once for all invoices
     const browser = await puppeteer.launch();
 
     for (const row of results) {
-      //const formattedToday = formatDate(today);
-      const formattedToday = moment(today).format("MMMM Do YYYY");
-      let [unitNumber, date, invoiceNumber, parts, labor, type] = row;
-
-      // Reads date from xlsx file one day short. Adding a day.
-      if (date instanceof Date) {
-        date.setDate(date.getDate() + 1);
-        date = moment(date).format("L"); // Format date as MM-DD-YYYY
-      }
-
+      const formattedToday = moment().format("MMMM Do YYYY");
+      const [unitNumber, date, invoiceNumber, parts, labor, type] = row;
+      const formattedDate = moment(date).add(1, "day").format("L"); // Format date as MM-DD-YYYY
       const totalAmount = parts + labor;
 
       const { template, pdfPath } = getInvoiceAndPath(
@@ -83,16 +73,13 @@ readXlsxFile(path, { sheet: "July 24", dateFormat: "MM-DD-YYYY" }).then(
       const invoiceHTML = replaceTemplatePlaceholders(template, {
         formattedToday,
         unitNumber,
-        date,
+        formattedDate,
         invoiceNumber,
         totalAmount,
       });
 
       // Check if the file already exists, and skip if it does
       if (fileExists(pdfPath)) {
-        // console.log(
-        //   `Invoice for Unit ${unitNumber} already exists. Skipping...`,
-        // );
         continue; // Skip to the next iteration if the file exists
       }
 
