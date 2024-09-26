@@ -1,4 +1,4 @@
-const readXlsxFile = require("read-excel-file/node");
+const xlsx = require("xlsx");
 const puppeteer = require("puppeteer");
 const moment = require("moment");
 const fs = require("fs");
@@ -10,6 +10,7 @@ const woTemplate = readTemplate(woTemplatePath);
 const kTemplate = readTemplate(kTemplatePath);
 const fTemplate = readTemplate(fTemplatePath);
 const templates = { woTemplate, kTemplate, fTemplate };
+const sheetName = moment().format("MMM YY");
 
 // Function to replace placeholders in the HTML template with dynamic values
 function replaceTemplatePlaceholders(template, data) {
@@ -28,14 +29,12 @@ function readTemplate(templatePath) {
 
 // Generates the path for the PDF files
 function getPath(unitNumber, invoice, title) {
-  return `${__dirname}/invoices/${moment().format(
-    "MMM YY"
-  )}/Regatta ${unitNumber} ${title} ${invoice}.pdf`;
+  return `${__dirname}/invoices/${sheetName}/Regatta ${unitNumber} ${title} ${invoice}.pdf`;
 }
 
 // Make a new directory based on current month and year in MMM YY format
 function invoiceDirectory() {
-  const folderName = `${__dirname}/invoices/${moment().format("MMM YY")}`;
+  const folderName = `${__dirname}/invoices/${sheetName}`;
   try {
     if (!fs.existsSync(folderName)) {
       fs.mkdirSync(folderName);
@@ -43,6 +42,31 @@ function invoiceDirectory() {
   } catch (err) {
     console.error(err);
   }
+}
+
+function getSheet(workbook, sheetName) {
+  if (workbook.SheetNames.includes(sheetName)) {
+    return workbook.Sheets[sheetName];
+  } else {
+    return mkNewSheet(workbook, sheetName);
+  }
+}
+
+function mkNewSheet(workbook, sheetName) {
+  const headers = [
+    [
+      "Unit Number",
+      "Date",
+      "Invoice Number",
+      "Parts Cost",
+      "Labor Cost",
+      "Type",
+    ],
+  ];
+  const newSheet = xlsx.utils.aoa_to_sheet(headers);
+  xlsx.utils.book_append_sheet(workbook, newSheet, sheetName);
+  xlsx.writeFile(workbook, path);
+  return newSheet;
 }
 
 // Generate full invoice path
@@ -71,57 +95,73 @@ function getInvoiceAndPath(type, unitNumber, invoice, templates) {
 // Update latest directory
 invoiceDirectory();
 
-readXlsxFile(path, { sheet: "July 24", dateFormat: "MM-DD-YYYY" }).then(
-  async (rows) => {
-    const results = rows.filter((row) => row[0] != null)?.toSpliced(0, 2);
+// Main function
+async function generateInvoices() {
+  // Read or create the workbook
+  const workbook = xlsx.readFile(path);
 
-    // Launch Puppeteer once for all invoices
-    const browser = await puppeteer.launch();
+  // Get or create the target sheet
+  const worksheet = getSheet(workbook, sheetName);
 
-    for (const row of results) {
-      const formattedToday = moment().format("MMMM Do YYYY");
-      const [unitNumber, date, invoiceNumber, parts, labor, type] = row;
-      const formattedDate = moment(date).add(1, "day").format("L"); // Format date as MM-DD-YYYY
-      const totalAmount = parts + labor;
+  // Convert sheet data to JSON for processing
+  const rows = xlsx.utils.sheet_to_json(worksheet);
 
-      const { template, pdfPath } = getInvoiceAndPath(
-        type,
-        unitNumber,
-        invoiceNumber,
-        templates
-      );
+  // Launch Puppeteer once for all invoices
+  const browser = await puppeteer.launch();
 
-      const invoiceHTML = replaceTemplatePlaceholders(template, {
-        formattedToday,
-        unitNumber,
-        formattedDate,
-        invoiceNumber,
-        totalAmount,
-      });
+  for (const row of rows) {
+    const formattedToday = moment().format("MMMM Do YYYY");
+    const [unitNumber, date, invoiceNumber, parts, labor, type] = [
+      row["Unit Number"],
+      row["Date"],
+      row["Invoice Number"],
+      row["Parts Cost"],
+      row["Labor Cost"],
+      row["Type"],
+    ];
+    const formattedDate = moment(date).add(1, "day").format("L"); // Format date as MM-DD-YYYY
+    const totalAmount = parts + labor;
 
-      // Check if the file already exists, and skip if it does
-      if (fs.existsSync(pdfPath)) {
-        continue; // Skip to the next iteration if the file exists
-      }
+    const { template, pdfPath } = getInvoiceAndPath(
+      type,
+      unitNumber,
+      invoiceNumber,
+      templates
+    );
 
-      // Create a new page in Puppeteer for each invoice
-      const page = await browser.newPage();
-      await page.setContent(invoiceHTML);
+    const invoiceHTML = replaceTemplatePlaceholders(template, {
+      formattedToday,
+      unitNumber,
+      formattedDate,
+      invoiceNumber,
+      totalAmount,
+    });
 
-      // Save the PDF to file
-      await page.pdf({
-        path: pdfPath,
-        format: "LETTER",
-        printBackground: true,
-      });
-
-      console.log(`PDF generated: ${pdfPath}`);
-
-      // Close the page after saving the PDF
-      await page.close();
+    // Check if the file already exists, and skip if it does
+    if (fs.existsSync(pdfPath)) {
+      continue; // Skip to the next iteration if the file exists
     }
 
-    // Close Puppeteer browser after all PDFs are generated
-    await browser.close();
+    // Create a new page in Puppeteer for each invoice
+    const page = await browser.newPage();
+    await page.setContent(invoiceHTML);
+
+    // Save the PDF to file
+    await page.pdf({
+      path: pdfPath,
+      format: "LETTER",
+      printBackground: true,
+    });
+
+    console.log(`PDF generated: ${pdfPath}`);
+
+    // Close the page after saving the PDF
+    await page.close();
   }
-);
+
+  // Close Puppeteer browser after all PDFs are generated
+  await browser.close();
+}
+
+// Run the invoice generation process
+generateInvoices();
