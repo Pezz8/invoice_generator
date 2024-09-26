@@ -26,10 +26,26 @@ function readTemplate(templatePath) {
   return fs.readFileSync(templatePath, "utf-8");
 }
 
+// Generates the path for the PDF files
 function getPath(unitNumber, invoice, title) {
-  return `${__dirname}/invoices/Regatta ${unitNumber} ${title}  ${invoice}.pdf`;
+  return `${__dirname}/invoices/${moment().format(
+    "MMM YY"
+  )}/Regatta ${unitNumber} ${title} ${invoice}.pdf`;
 }
 
+// Make a new directory based on current month and year in MMM YY format
+function invoiceDirectory() {
+  const folderName = `${__dirname}/invoices/${moment().format("MMM YY")}`;
+  try {
+    if (!fs.existsSync(folderName)) {
+      fs.mkdirSync(folderName);
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// Generate full invoice path
 function getInvoiceAndPath(type, unitNumber, invoice, templates) {
   switch (type.toUpperCase()) {
     case "K":
@@ -52,6 +68,9 @@ function getInvoiceAndPath(type, unitNumber, invoice, templates) {
   }
 }
 
+// Update latest directory
+invoiceDirectory();
+
 readXlsxFile(path, { sheet: "July 24", dateFormat: "MM-DD-YYYY" }).then(
   async (rows) => {
     const results = rows.filter((row) => row[0] != null)?.toSpliced(0, 2);
@@ -69,7 +88,7 @@ readXlsxFile(path, { sheet: "July 24", dateFormat: "MM-DD-YYYY" }).then(
         type,
         unitNumber,
         invoiceNumber,
-        templates,
+        templates
       );
 
       const invoiceHTML = replaceTemplatePlaceholders(template, {
@@ -104,5 +123,5 @@ readXlsxFile(path, { sheet: "July 24", dateFormat: "MM-DD-YYYY" }).then(
 
     // Close Puppeteer browser after all PDFs are generated
     await browser.close();
-  },
+  }
 );
