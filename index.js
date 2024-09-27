@@ -2,6 +2,7 @@ const xlsx = require("xlsx");
 const puppeteer = require("puppeteer");
 const moment = require("moment");
 const fs = require("fs");
+const pathFn = require("path");
 const path = `${__dirname}/resources/report.xlsx`;
 const woTemplatePath = `${__dirname}/resources/invoices_templates/work_order_temp.html`;
 const kTemplatePath = `${__dirname}/resources/invoices_templates/key_order_temp.html`;
@@ -19,7 +20,8 @@ function replaceTemplatePlaceholders(template, data) {
     .replace("{{unitNumber}}", data.unitNumber)
     .replace("{{date}}", data.date)
     .replace("{{invoiceNumber}}", data.invoiceNumber)
-    .replace("{{totalAmount}}", data.totalAmount);
+    .replace("{{totalAmount}}", data.totalAmount)
+    .replace("{{title}}", data.fileName);
 }
 
 // Function to read the HTML template
@@ -120,7 +122,12 @@ async function generateInvoices() {
       row["Type"],
     ];
     const formattedDate = moment(date).add(1, "day").format("L"); // Format date as MM-DD-YYYY
-    const totalAmount = parts + labor;
+
+    // Ensure parts and labor are numbers, defaulting to 0 if they are not valid
+    const partsCost = parseFloat(parts) || 0;
+    const laborCost = parseFloat(labor) || 0;
+
+    const totalAmount = partsCost + laborCost;
 
     const { template, pdfPath } = getInvoiceAndPath(
       type,
@@ -129,12 +136,15 @@ async function generateInvoices() {
       templates
     );
 
+    const fileName = pathFn.basename(pdfPath);
+
     const invoiceHTML = replaceTemplatePlaceholders(template, {
       formattedToday,
       unitNumber,
       formattedDate,
       invoiceNumber,
       totalAmount,
+      fileName,
     });
 
     // Check if the file already exists, and skip if it does
