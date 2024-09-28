@@ -3,7 +3,7 @@ const puppeteer = require("puppeteer");
 const moment = require("moment");
 const fs = require("fs");
 const pathFn = require("path");
-const path = `/home/cristian/OneDrive/Documents/testing/report/report.xlsx`;
+const path = `${__dirname}/resources/report.xlsx`;
 const woTemplatePath = `${__dirname}/resources/invoices_templates/work_order_temp.html`;
 const kTemplatePath = `${__dirname}/resources/invoices_templates/key_order_temp.html`;
 const fTemplatePath = `${__dirname}/resources/invoices_templates/filter_order_temp.html`;
@@ -13,6 +13,8 @@ const fTemplate = readTemplate(fTemplatePath);
 const templates = { woTemplate, kTemplate, fTemplate };
 const sheetName = moment().format("MMM YY");
 const testPath = `/home/cristian/OneDrive/Documents/testing`;
+
+// /home/cristian/OneDrive/Documents/testing/report
 
 // Function to replace placeholders in the HTML template with dynamic values
 function replaceTemplatePlaceholders(template, data) {
