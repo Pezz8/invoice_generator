@@ -117,14 +117,16 @@ async function generateInvoices() {
 
   for (const row of rows) {
     const formattedToday = moment().format("MMMM Do YYYY");
-    const [unitNumber, date, invoiceNumber, parts, labor, type] = [
-      row["Unit Number"],
-      row["Date"],
-      row["Invoice Number"],
-      row["Parts Cost"],
-      row["Labor Cost"],
-      row["Type"],
-    ];
+
+    const {
+      "Unit Number": unitNumber,
+      "Date": date,
+      "Invoice Number": invoiceNumber,
+      "Parts Cost": parts,
+      "Labor Cost": labor,
+      "Type": type,
+    } = row;
+
     const formattedDate = moment(date).add(1, "day").format("L"); // Format date as MM-DD-YYYY
 
     // Ensure parts and labor are numbers, defaulting to 0 if they are not valid
@@ -137,7 +139,7 @@ async function generateInvoices() {
       type,
       unitNumber,
       invoiceNumber,
-      templates
+      templates,
     );
 
     const fileName = pathFn.basename(pdfPath);
