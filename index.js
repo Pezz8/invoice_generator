@@ -12,7 +12,7 @@ const kTemplate = readTemplate(kTemplatePath);
 const fTemplate = readTemplate(fTemplatePath);
 const templates = { woTemplate, kTemplate, fTemplate };
 const sheetName = moment().format("MMM YY");
-const testPath = `/home/cristian/OneDrive/Documents/testing`;
+const testPath = `/home/cristian/OneDrive/Documents/test`;
 
 // /home/cristian/OneDrive/Documents/testing/report
 
@@ -120,11 +120,11 @@ async function generateInvoices() {
 
     const {
       "Unit Number": unitNumber,
-      "Date": date,
+      Date: date,
       "Invoice Number": invoiceNumber,
       "Parts Cost": parts,
       "Labor Cost": labor,
-      "Type": type,
+      Type: type,
     } = row;
 
     const formattedDate = moment(date).add(1, "day").format("L"); // Format date as MM-DD-YYYY
@@ -139,7 +139,7 @@ async function generateInvoices() {
       type,
       unitNumber,
       invoiceNumber,
-      templates,
+      templates
     );
 
     const fileName = pathFn.basename(pdfPath);
