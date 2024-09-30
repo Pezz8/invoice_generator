@@ -1,54 +1,11 @@
-const fs = require("fs");
-const xlsx = require("xlsx");
+import fs from "fs";
+import xlsx from "xlsx";
+import { invoicePath, sheetName } from "./config.js";
 
-const { invoicePath, sheetName } = require("./config");
+const getPath = (unitNumber, invoice, title) =>
+  `${invoicePath}/${sheetName}/Regatta ${unitNumber} ${title} ${invoice}.pdf`;
 
-// Function to replace placeholders in the HTML template with dynamic values
-function replaceTemplatePlaceholders(template, data) {
-  return template
-    .replace("{{formattedToday}}", data.formattedToday)
-    .replace("{{unitNumber}}", data.unitNumber)
-    .replace("{{date}}", data.date)
-    .replace("{{invoiceNumber}}", data.invoiceNumber)
-    .replace("{{totalAmount}}", data.totalAmount)
-    .replace("{{title}}", data.fileName);
-}
-
-// Function to read the HTML template
-function readTemplate(templatePath) {
-  return fs.readFileSync(templatePath, "utf-8");
-}
-
-// Generates the path for the PDF files
-function getPath(unitNumber, invoice, title) {
-  // return `${testPath}/Regatta ${unitNumber} ${title} ${invoice}.pdf`;
-  return `${invoicePath}/${sheetName}/Regatta ${unitNumber} ${title} ${invoice}.pdf`;
-}
-
-// Make a new directory based on current month and year in MMM YY format
-function invoiceDirectory() {
-  const folderName = `${invoicePath}/${sheetName}`;
-  try {
-    if (!fs.existsSync(invoicePath)) {
-      fs.mkdirSync(invoicePath);
-      fs.mkdirSync(folderName);
-    } else if (!fs.existsSync(folderName)) {
-      fs.mkdirSync(folderName);
-    }
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-function getSheet(workbook, sheetName) {
-  if (workbook.SheetNames.includes(sheetName)) {
-    return workbook.Sheets[sheetName];
-  } else {
-    return mkNewSheet(workbook, sheetName);
-  }
-}
-
-function mkNewSheet(workbook, sheetName) {
+const mkNewSheet = (workbook, sheetName) => {
   const headers = [
     [
       "Unit Number",
@@ -63,10 +20,49 @@ function mkNewSheet(workbook, sheetName) {
   xlsx.utils.book_append_sheet(workbook, newSheet, sheetName);
   xlsx.writeFile(workbook, reportPath);
   return newSheet;
+};
+
+// Function to replace placeholders in the HTML template with dynamic values
+export function replaceTemplatePlaceholders(template, data) {
+  return template
+    .replace("{{formattedToday}}", data.formattedToday)
+    .replace("{{unitNumber}}", data.unitNumber)
+    .replace("{{date}}", data.date)
+    .replace("{{invoiceNumber}}", data.invoiceNumber)
+    .replace("{{totalAmount}}", data.totalAmount)
+    .replace("{{title}}", data.fileName);
+}
+
+// Function to read the HTML template
+export function readTemplate(templatePath) {
+  return fs.readFileSync(templatePath, "utf-8");
+}
+
+// Make a new directory based on current month and year in MMM YY format
+export function invoiceDirectory() {
+  const folderName = `${invoicePath}/${sheetName}`;
+  try {
+    if (!fs.existsSync(invoicePath)) {
+      fs.mkdirSync(invoicePath);
+      fs.mkdirSync(folderName);
+    } else if (!fs.existsSync(folderName)) {
+      fs.mkdirSync(folderName);
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+export function getSheet(workbook, sheetName) {
+  if (workbook.SheetNames.includes(sheetName)) {
+    return workbook.Sheets[sheetName];
+  } else {
+    return mkNewSheet(workbook, sheetName);
+  }
 }
 
 // Generate full invoice path
-function getInvoiceAndPath(type, unitNumber, invoice, templates) {
+export function getInvoiceAndPath(type, unitNumber, invoice, templates) {
   const upperType = String(type).toUpperCase();
   switch (upperType) {
     case "K":
@@ -88,12 +84,3 @@ function getInvoiceAndPath(type, unitNumber, invoice, templates) {
       };
   }
 }
-
-module.exports = {
-  replaceTemplatePlaceholders,
-  readTemplate,
-  invoiceDirectory,
-  invoiceDirectory,
-  getInvoiceAndPath,
-  getSheet,
-};
