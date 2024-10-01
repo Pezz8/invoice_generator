@@ -1,27 +1,26 @@
-//Import node_modules
-const xlsx = require("xlsx");
-const puppeteer = require("puppeteer");
-const moment = require("moment");
-const fs = require("fs");
-const path = require("path");
+import xlsx from "xlsx";
+import puppeteer from "puppeteer";
+import moment from "moment";
+import fs from "fs";
+import path from "path";
 
 // Import the paths from the configuration file
-const {
+import {
   reportPath,
   woTemplatePath,
   kTemplatePath,
   fTemplatePath,
   sheetName,
   formattedToday,
-} = require("./my_config");
+} from "./config.js";
 
-const {
+import {
   replaceTemplatePlaceholders,
   readTemplate,
   invoiceDirectory,
   getInvoiceAndPath,
   getSheet,
-} = require("./invoiceFunctions");
+} from "./invoiceFunctions.js";
 
 // Loading temmplates
 const woTemplate = readTemplate(woTemplatePath);

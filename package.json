@@ -6,6 +6,7 @@
   "scripts": {},
   "author": "",
   "license": "ISC",
+  "type": "module",
   "dependencies": {
     "fs": "0.0.1-security",
     "moment": "^2.30.1",
