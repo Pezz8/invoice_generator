@@ -13,7 +13,7 @@ const {
   fTemplatePath,
   sheetName,
   formattedToday,
-} = require("./config");
+} = require("./my_config");
 
 const {
   replaceTemplatePlaceholders,
@@ -47,6 +47,7 @@ async function generateInvoices() {
   const browser = await puppeteer.launch();
 
   for (const row of rows) {
+    console.log(row);
     const {
       "Unit Number": unitNumber,
       "Order Date": date,
@@ -56,14 +57,32 @@ async function generateInvoices() {
       "Invoice Type": type,
     } = row;
 
-    // Format date as MM-DD-YYYY
-    const formattedDate = moment(date).add(1, "day").format("L");
+    console.log(date);
+    console.log(labor);
+    console.log(parts);
+
+    // // Format date as MM-DD-YYYY
+    // const formattedDate = moment(date).add(1, "day").format("L");
+
+    let formattedDate;
+    if (typeof date === "number") {
+      // Handle Excel serial date
+      formattedDate = moment(
+        new Date((date - (25567 + 1)) * 86400 * 1000)
+      ).format("L");
+    } else {
+      // If it's already a valid date, format it
+      formattedDate = moment(date).add(1, "day").format("L");
+    }
 
     // Ensure parts and labor are numbers, defaulting to 0 if they are not valid
     const partsCost = parseFloat(parts) || 0;
     const laborCost = parseFloat(labor) || 0;
 
     const totalAmount = partsCost + laborCost;
+
+    console.log(formattedDate);
+    console.log(totalAmount);
 
     const { template, pdfPath } = getInvoiceAndPath(
       type,
