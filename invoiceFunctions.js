@@ -1,6 +1,6 @@
 import fs from "fs";
 import xlsx from "xlsx";
-import { invoicePath, sheetName } from "./config.js";
+import { invoicePath, sheetName, reportPath } from "./config.js";
 
 const getPath = (unitNumber, invoice, title) =>
   `${invoicePath}/${sheetName}/Regatta ${unitNumber} ${title} ${invoice}.pdf`;
@@ -40,17 +40,7 @@ export function readTemplate(templatePath) {
 
 // Make a new directory based on current month and year in MMM YY format
 export function invoiceDirectory() {
-  const folderName = `${invoicePath}/${sheetName}`;
-  try {
-    if (!fs.existsSync(invoicePath)) {
-      fs.mkdirSync(invoicePath);
-      fs.mkdirSync(folderName);
-    } else if (!fs.existsSync(folderName)) {
-      fs.mkdirSync(folderName);
-    }
-  } catch (err) {
-    console.error(err);
-  }
+  return fs.promises.mkdir(`${invoicePath}/${sheetName}`, { recursive: true });
 }
 
 export function getSheet(workbook, sheetName) {
@@ -63,7 +53,8 @@ export function getSheet(workbook, sheetName) {
 
 // Generate full invoice path
 export function getInvoiceAndPath(type, unitNumber, invoice, templates) {
-  const upperType = String(type).toUpperCase();
+  const upperType = type.toUpperCase();
+  // console.log(upperType);
   switch (upperType) {
     case "K":
       return {

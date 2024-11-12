@@ -1,8 +1,9 @@
-import xlsx from "xlsx";
+import * as xlsx from "xlsx";
 import puppeteer from "puppeteer";
 import moment from "moment";
 import fs from "fs";
 import path from "path";
+xlsx.set_fs(fs);
 
 // Import the paths from the configuration file
 import {
@@ -28,9 +29,6 @@ const kTemplate = readTemplate(kTemplatePath);
 const fTemplate = readTemplate(fTemplatePath);
 const templates = { woTemplate, kTemplate, fTemplate };
 
-// Update latest directory
-invoiceDirectory();
-
 // Main function
 async function generateInvoices() {
   // Read or create the workbook
@@ -46,7 +44,6 @@ async function generateInvoices() {
   const browser = await puppeteer.launch();
 
   for (const row of rows) {
-    console.log(row);
     const {
       "Unit Number": unitNumber,
       "Order Date": date,
@@ -55,10 +52,6 @@ async function generateInvoices() {
       "Labor Cost": labor,
       "Invoice Type": type,
     } = row;
-
-    console.log(date);
-    console.log(labor);
-    console.log(parts);
 
     // // Format date as MM-DD-YYYY
     // const formattedDate = moment(date).add(1, "day").format("L");
@@ -79,9 +72,6 @@ async function generateInvoices() {
     const laborCost = parseFloat(labor) || 0;
 
     const totalAmount = partsCost + laborCost;
-
-    console.log(formattedDate);
-    console.log(totalAmount);
 
     const { template, pdfPath } = getInvoiceAndPath(
       type,
@@ -128,4 +118,4 @@ async function generateInvoices() {
 }
 
 // Run the invoice generation process
-generateInvoices();
+invoiceDirectory().then(generateInvoices);
