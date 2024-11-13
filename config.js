@@ -20,12 +20,18 @@ const options = commandLineArgs(optionDefinitions);
 
 const __dirname = import.meta.dirname;
 
+// Use the provided month and year or default to the current date
+const currentDate = moment();
+const month = options.month || currentDate.format("MMM"); // Default to current month
+const year = options.year || currentDate.format("YY"); // Default to current year
+
 // Mac OneDrive directory path
 // export const invoicePath = `/Users/yourUserName/Library/CloudStorage/OneDrive-Personal/Documents/invoice_generator/invoices/`;
 // export const reportPath = `/Users/yourUserName/Library/CloudStorage/OneDrive-Personal/Documents/invoice_generator/reports/report.xlsx`;
 /* Local directory path*/
 export const invoicePath = `${__dirname}/invoices`;
 export const reportPath = `${__dirname}/resources/report.xlsx`;
+export const workOrderPath = `${__dirname}/resources/work_orders`;
 /* OneDrive Client for Linux directory path
 const invoicePath = `/home/yourUserName/OneDrive/Documents/testing/invoices/`;
 const reportPath = `/home/yourUserName/OneDrive/Documents/testing/reports/report.xlsx`;*/
