@@ -1,128 +1,127 @@
-# Invoice Generation Automation
+# Invoice Generator and PDF Merger
 
-This project automates the process of generating customized invoices for different types of work orders (key orders, HVAC filter orders, regular work orders) based on an Excel sheet input. The program reads an Excel file containing work order information, selects the appropriate HTML template, and generates PDFs for each work order.
+This project automates the generation of invoices from an Excel file and merges them with corresponding work order PDFs. It uses Puppeteer for PDF generation, pdf-merger-js for merging PDFs, and command-line arguments to handle date-based configurations.
 
-## Features
+## Table of Contents
 
-- **Automated Invoice Generation**: Automatically creates PDF invoices from an Excel report with details like the unit number, invoice type, and work order date.
-- **Multiple Invoice Types**: Generates different types of invoices (key order, HVAC filter, and work orders) based on the data in the Excel sheet.
-- **File Skipping**: Checks if a PDF already exists for a given work order and skips generating it if the file is found, preventing duplicate files.
+- [Overview](#overview)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Configuration](#configuration)
+- [Project Structure](#project-structure)
+- [Dependencies](#dependencies)
+- [Acknowledgements](#acknowledgements)
 
-## How It Works
+## Overview
 
-1. The program reads data from the Excel file (`report.xlsx`) that contains work orders, including information such as the unit number, type of work, and invoice number.
-2. Based on the type of work (key order, filter order, or regular work order), the program selects the appropriate HTML template from the `invoices_templates` folder.
-3. The program replaces placeholders in the template with dynamic data from the Excel file, such as the date, invoice number, and total amount.
-4. Using Puppeteer, the HTML template is converted into a PDF file and saved in the `invoices` folder.
-5. If a PDF for a specific work order already exists, the program skips creating a duplicate.
+The Invoice Generator automates the following tasks:
 
-## Requirements
+1. Reads data from an Excel file to generate invoice PDFs using HTML templates.
+2. Merges each invoice PDF with its corresponding work order PDF, if available.
+3. Deletes the work order PDF after merging to keep the directory clean.
 
-- Node.js
-- `puppeteer`
-- `read-excel-file`
-- `moment`
-- `fs`
+## Installation
 
-## Setup and Installation
+To run this project on your local machine, follow these steps:
 
-1. **Clone the repository**:
+1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/Pezz8/invoice-automation.git
-   cd invoice-automation
-
+    git clone https://github.com/Pezz8/invoice_generator.git
+    cd invoice_generator
    ```
 
-2. **Install dependencies**:
-
+2. **Install dependencies:**
    ```bash
    npm install
-
    ```
 
-3. **Place your Excel file and templates**:
+This command will install all required Node.js packages, such as `xlsx`, `puppeteer`, `pdf-merger-js`, `moment`, `fs`, and `command-line-args`.
 
-   - Place your Excel file (`report.xlsx`) in the `resources` folder.
-   - HTML templates for each type of invoice should be placed in `resources/invoices_templates`. The required templates are:
-     - `work_order_temp.html` (for general work orders)
-     - `key_order_temp.html` (for key-related work orders)
-     - `filter_order_temp.html` (for HVAC filter-related work orders)
+3. **Ensure you have Node.js and npm installed:**
 
-4. **Run the program**:
-   ```bash
-   node index.js
-   ```
+   - You can check if Node.js and npm are installed by running:
 
-## Input Files
+     ```bash
+       node -v
+       npm -v
+     ```
 
-### Excel File (`report.xlsx`)
+- If they are not installed, download and install them from [Node.js](https://nodejs.org/).
 
-The Excel file should contain the following columns:
+4. **Set up the directory structure:**
+   - Make sure your directories for `invoices`, `reports`, and `work_orders` are correctly set up in your project directory. The structure should look like this:
+     ```
+     resources/
+     ├── invoices_templates/
+     │   ├── work_order_temp.html
+     │   ├── key_order_temp.html
+     │   └── filter_order_temp.html
+     ├── report.xlsx
+     └── work_orders/
+     ```
 
-- **Column 1 (Unit Number)**: The unit number where the work was performed.
-- **Column 2 (Date)**: The date the work was completed.
-- **Column 3 (Invoice Number)**: The unique invoice number for the work order.
-- **Column 4 (Parts Cost)**: The cost of the parts used.
-- **Column 5 (Labor Cost)**: The labor cost for the work.
-- **Column 6 (Type)**: The type of work (`K` for key orders, `F` for filter orders, or any other value for general work orders).
+## Usage
 
-![Excel Screenshot](resources/screenshots/reportScreenshot.png)
+1.  **Run the Invoice Generator:**
+    ```bash
+       node index.js
+    ```
 
-### HTML Templates
+This command generates invoices based on the data in `report.xlsx` and merges them with the corresponding work order PDFs.
 
-Each invoice type uses a different HTML template, which includes placeholders for dynamic data. The templates should be structured as follows:
+2. **Using Command-Line Arguments:**
 
-- **Work Order Template (`work_order_temp.html`)**
+   - You can specify the month and year to customize the current sheet name using:
 
-  - Contains placeholders such as `{{formattedToday}}`, `{{unitNumber}}`, `{{date}}`, `{{invoiceNumber}}`, and `{{totalAmount}}`.
+     ```bash
+         node index.js -m Jan -y 24
+     ```
 
-- **Key Order Template (`key_order_temp.html`)**
+- `-m` or `--month`: Specify the month (default: current month)
+- `-y` or `--year`: Specify the year (default: current year)
 
-  - Contains placeholders for key-related orders.
+## Configuration
 
-- **Filter Order Template (`filter_order_temp.html`)**
-  - Contains placeholders for HVAC filter orders.
+The configuration settings for paths, date formatting, and command-line arguments are managed in `config.js`.
 
-## Output
+### config.js
 
-The program generates a PDF for each work order and saves it to the `invoices` folder. The naming convention for the PDF files is as follows:
+- **Paths**: You can set paths for invoices, reports, work orders, and HTML templates in the configuration file.
+- **Date Handling**: `moment.js` is used to handle and format dates.
+- **Command-Line Arguments**: The `command-line-args` package is used to parse and handle arguments for specifying the month and year.
 
-- **Key Order PDF**: `Unit {unitNumber} key order invoice {invoiceNumber}.pdf`
-- **Filter Order PDF**: `Unit {unitNumber} HVAC filter invoice {invoiceNumber}.pdf`
-- **Work Order PDF**: `Unit {unitNumber} work order invoice {invoiceNumber}.pdf`
-
-Example output:
-
-![PDF Screenshot](resources/screenshots/invoiceScreenshot.png)
-
-## Folder Structure
+## Project Structure
 
 ```bash
-invoice-automation/
-│
-├── resources/
-│   ├── report.xlsx
-│   └── invoices_templates/
-│       ├── work_order_temp.html
-│       ├── key_order_temp.html
-│       └── filter_order_temp.html
-├── invoices/
-│   └── (Generated PDF files will be saved here)
-├── index.js
-├── package.json
-└── README.md
+.
+├── config.js # Configuration file for paths and date settings
+├── index.js # Main script for generating and merging PDFs
+├── invoiceFunctions.js # Utility functions for handling invoices and templates
+├── woMerger.js # Script for merging and deleting work order PDFs
+├── resources/ # Directory containing templates and work order PDFs
+│ ├── invoices_templates/ # HTML templates for generating invoices
+│ └── work_orders/ # Directory for work order PDFs
+└── package.json # Project metadata and dependencies
 ```
 
 ## Dependencies
 
-- [Puppeteer](https://pptr.dev/): Headless Chrome Node API for generating PDF files.
-- [read-excel-file](https://www.npmjs.com/package/read-excel-file): Library for reading data from Excel files.
-- [moment](https://momentjs.com/): JavaScript library for date formatting.
-- Node's native `fs` module for file system operations.
+The project uses the following Node.js packages:
 
-## Example Use Case
+- **xlsx**: For reading and writing Excel files.
+- **puppeteer**: For generating PDFs from HTML templates.
+- **pdf-merger-js**: For merging PDFs.
+- **moment**: For date formatting and handling.
+- **fs**: For file system operations.
+- **command-line-args**: For handling command-line arguments.
 
-1. The `report.xlsx` file is filled out with all work orders for the month.
-2. The user runs the program, and the appropriate PDFs are automatically generated and saved in the `invoices` folder.
-3. If an invoice already exists, the program skips that file, avoiding duplicate work.
+## Acknowledgements
+
+- [Node.js](https://nodejs.org/)
+- [Puppeteer](https://github.com/puppeteer/puppeteer)
+- [pdf-merger-js](https://www.npmjs.com/package/pdf-merger-js)
+- [moment](https://momentjs.com/)
+- [xlsx](https://github.com/SheetJS/sheetjs)
+
+---
