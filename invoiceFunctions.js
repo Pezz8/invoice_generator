@@ -1,6 +1,6 @@
 import fs from "fs";
 import xlsx from "xlsx";
-import { invoicePath, sheetName, reportPath } from "./config.js";
+import { invoicePath, sheetName, reportPath } from "./my_config.js";
 
 const getPath = (unitNumber, invoice, title) =>
   `${invoicePath}/${sheetName}/Regatta ${unitNumber} ${title} ${invoice}.pdf`;

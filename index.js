@@ -14,7 +14,7 @@ import {
   sheetName,
   formattedToday,
   workOrderPath,
-} from "./config.js";
+} from "./my_config.js";
 
 import {
   replaceTemplatePlaceholders,
