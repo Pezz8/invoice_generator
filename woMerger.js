@@ -1,9 +1,9 @@
 import fs from "fs";
 import pdfMerger from "pdf-merger-js";
-import { workOrderPath } from "./my_config.js";
+import { workOrderPath } from "./config.js";
 
 // Function to merge PDFs
-async function mergePDFs(pdfPath, unitNumber, invoiceNumber) {
+async function mergePDFs(pdfPath, invoiceNumber) {
   const merger = new pdfMerger();
 
   // Construct the path to the work order PDF

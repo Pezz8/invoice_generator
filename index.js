@@ -14,14 +14,17 @@ import {
   sheetName,
   formattedToday,
   workOrderPath,
-} from "./my_config.js";
+} from "./config.js";
+
+import { getSheet } from "./reportFunctions.js";
+
+import { handleExistingPDF } from "./invoiceFunctions.js";
 
 import {
   replaceTemplatePlaceholders,
   readTemplate,
   invoiceDirectory,
   getInvoiceAndPath,
-  getSheet,
 } from "./invoiceFunctions.js";
 import { mergePDFs } from "./woMerger.js";
 
@@ -83,7 +86,6 @@ async function generateInvoices() {
     );
 
     const fileName = path.basename(pdfPath);
-
     const invoiceHTML = replaceTemplatePlaceholders(template, {
       formattedToday,
       unitNumber,
@@ -93,13 +95,14 @@ async function generateInvoices() {
       fileName,
     });
 
-    // Check if the file already exists, and skip if it does
-    if (fs.existsSync(pdfPath)) {
-      const mergePath = `${workOrderPath}/${unitNumber}WorkOrder${invoiceNumber}.pdf`;
-      if (fs.existsSync(mergePath)) {
-        await mergePDFs(pdfPath, unitNumber, invoiceNumber);
-      }
-      continue; // Skip to the next iteration if the file exists
+    if (
+      await handleExistingPDF(
+        pdfPath,
+        `${workOrderPath}/${invoiceNumber}.pdf`,
+        invoiceNumber
+      )
+    ) {
+      continue;
     }
 
     // Create a new page in Puppeteer for each invoice
@@ -117,7 +120,7 @@ async function generateInvoices() {
     // Close the page after saving the PDF
     await page.close();
     // Calling merging function
-    await mergePDFs(pdfPath, unitNumber, invoiceNumber);
+    await mergePDFs(pdfPath, invoiceNumber);
   }
 
   // Close Puppeteer browser after all PDFs are generated

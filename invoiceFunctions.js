@@ -1,26 +1,8 @@
 import fs from "fs";
-import xlsx from "xlsx";
-import { invoicePath, sheetName, reportPath } from "./my_config.js";
+import { invoicePath, sheetName, workOrderPath } from "./config.js";
 
 const getPath = (unitNumber, invoice, title) =>
   `${invoicePath}/${sheetName}/Regatta ${unitNumber} ${title} ${invoice}.pdf`;
-
-const mkNewSheet = (workbook, sheetName) => {
-  const headers = [
-    [
-      "Unit Number",
-      "Order Date",
-      "Invoice Number",
-      "Parts Cost",
-      "Labor Cost",
-      "Invoice Type",
-    ],
-  ];
-  const newSheet = xlsx.utils.aoa_to_sheet(headers);
-  xlsx.utils.book_append_sheet(workbook, newSheet, sheetName);
-  xlsx.writeFile(workbook, reportPath);
-  return newSheet;
-};
 
 // Function to replace placeholders in the HTML template with dynamic values
 export function replaceTemplatePlaceholders(template, data) {
@@ -41,14 +23,6 @@ export function readTemplate(templatePath) {
 // Make a new directory based on current month and year in MMM YY format
 export function invoiceDirectory() {
   return fs.promises.mkdir(`${invoicePath}/${sheetName}`, { recursive: true });
-}
-
-export function getSheet(workbook, sheetName) {
-  if (workbook.SheetNames.includes(sheetName)) {
-    return workbook.Sheets[sheetName];
-  } else {
-    return mkNewSheet(workbook, sheetName);
-  }
 }
 
 // Generate full invoice path
@@ -74,4 +48,16 @@ export function getInvoiceAndPath(type, unitNumber, invoice, templates) {
         pdfPath: getPath(unitNumber, invoice, "Work Order Invoice"),
       };
   }
+}
+
+export async function handleExistingPDF(pdfPath, mergePath, invoiceNumber) {
+  // Check if the file already exists, and skip if it does
+  if (fs.existsSync(pdfPath)) {
+    const mergePath = `${workOrderPath}/${invoiceNumber}.pdf`;
+    if (fs.existsSync(mergePath)) {
+      await mergePDFs(pdfPath, invoiceNumber);
+    }
+    return true; // File already exists
+  }
+  return false; // File does not exist
 }

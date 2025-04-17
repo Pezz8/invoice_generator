@@ -37,9 +37,9 @@ const invoicePath = `/home/yourUserName/OneDrive/Documents/testing/invoices/`;
 const reportPath = `/home/yourUserName/OneDrive/Documents/testing/reports/report.xlsx`;*/
 
 // Templates path
-export const woTemplatePath = `${__dirname}/resources/invoices_templates/work_order_temp.html`;
-export const kTemplatePath = `${__dirname}/resources/invoices_templates/key_order_temp.html`;
-export const fTemplatePath = `${__dirname}/resources/invoices_templates/filter_order_temp.html`;
+export const woTemplatePath = `${__dirname}/resources/regatta_invoices_templates/work_order_temp.html`;
+export const kTemplatePath = `${__dirname}/resources/regatta_invoices_templates/key_order_temp.html`;
+export const fTemplatePath = `${__dirname}/resources/regatta_invoices_templates/filter_order_temp.html`;
 
 // Current sheet
 // export const sheetName = moment().format("MMM YY");
