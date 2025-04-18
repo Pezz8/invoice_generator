@@ -32,6 +32,7 @@ const year = options.year || currentDate.format("YY"); // Default to current yea
 export const invoicePath = `${__dirname}/invoices`;
 export const reportPath = `${__dirname}/resources/report.xlsx`;
 export const workOrderPath = `${__dirname}/resources/work_orders`;
+export const unitListPath = `${__dirname}/resources/unitList.xlsx`;
 /* OneDrive Client for Linux directory path
 const invoicePath = `/home/yourUserName/OneDrive/Documents/testing/invoices/`;
 const reportPath = `/home/yourUserName/OneDrive/Documents/testing/reports/report.xlsx`;*/
