@@ -7,7 +7,7 @@
   "author": "",
   "license": "ISC",
   "scripts": {
-    "test": "jest"
+    "test": "npx jest"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.0",
