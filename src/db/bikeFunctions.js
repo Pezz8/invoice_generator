@@ -1,4 +1,4 @@
-import prisma from "./prismaClient.js";
+import prisma from './prismaClient.js';
 
 // Register a Bike
 export async function registerBike(

@@ -1,5 +1,5 @@
-import fs from "fs";
-import { invoicePath, sheetName, workOrderPath } from "../config.js";
+import fs from 'fs';
+import { invoicePath, sheetName, workOrderPath } from '../config.js';
 
 const getPath = (unitNumber, invoice, title) =>
   `${invoicePath}/${sheetName}/Regatta ${unitNumber} ${title} ${invoice}.pdf`;
@@ -7,17 +7,17 @@ const getPath = (unitNumber, invoice, title) =>
 // Function to replace placeholders in the HTML template with dynamic values
 export function replaceTemplatePlaceholders(template, data) {
   return template
-    .replace("{{formattedToday}}", data.formattedToday)
-    .replace("{{unitNumber}}", data.unitNumber)
-    .replace("{{date}}", data.date)
-    .replace("{{invoiceNumber}}", data.invoiceNumber)
-    .replace("{{totalAmount}}", data.totalAmount)
-    .replace("{{title}}", data.fileName);
+    .replace('{{formattedToday}}', data.formattedToday)
+    .replace('{{unitNumber}}', data.unitNumber)
+    .replace('{{date}}', data.date)
+    .replace('{{invoiceNumber}}', data.invoiceNumber)
+    .replace('{{totalAmount}}', data.totalAmount)
+    .replace('{{title}}', data.fileName);
 }
 
 // Function to read the HTML template
 export function readTemplate(templatePath) {
-  return fs.readFileSync(templatePath, "utf-8");
+  return fs.readFileSync(templatePath, 'utf-8');
 }
 
 // Make a new directory based on current month and year in MMM YY format
@@ -30,22 +30,22 @@ export function getInvoiceAndPath(type, unitNumber, invoice, templates) {
   const upperType = type.toUpperCase();
   // console.log(upperType);
   switch (upperType) {
-    case "K":
+    case 'K':
       return {
         template: templates.kTemplate,
-        pdfPath: getPath(unitNumber, invoice, "Key Order Invoice"),
+        pdfPath: getPath(unitNumber, invoice, 'Key Order Invoice'),
       };
 
-    case "F":
+    case 'F':
       return {
         template: templates.fTemplate,
-        pdfPath: getPath(unitNumber, invoice, "HVAC Filter Invoice"),
+        pdfPath: getPath(unitNumber, invoice, 'HVAC Filter Invoice'),
       };
 
     default:
       return {
         template: templates.woTemplate,
-        pdfPath: getPath(unitNumber, invoice, "Work Order Invoice"),
+        pdfPath: getPath(unitNumber, invoice, 'Work Order Invoice'),
       };
   }
 }

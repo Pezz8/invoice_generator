@@ -1,4 +1,4 @@
-import prisma from "./prismaClient.js";
+import prisma from './prismaClient.js';
 
 // Assign a Person to a Unit
 export async function assignPersonToUnit(

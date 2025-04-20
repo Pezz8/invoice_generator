@@ -1,4 +1,4 @@
-import prisma from "./prismaClient.js";
+import prisma from './prismaClient.js';
 
 // Create an Invoice
 export async function createInvoice({
@@ -30,7 +30,7 @@ export async function findInvoicesByUnit(unitId) {
       unit_id: unitId,
     },
     orderBy: {
-      created_at: "desc",
+      created_at: 'desc',
     },
   });
 }

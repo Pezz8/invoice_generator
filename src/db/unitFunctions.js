@@ -1,10 +1,12 @@
-import prisma from "./prismaClient.js";
+import prisma from './prismaClient.js';
+import { randomUUID } from 'crypto';
 
 // Create a Unit
 export async function createUnit(unitNumber) {
   return await prisma.units.create({
     data: {
       unit_number: unitNumber,
+      uuid: randomUUID(),
     },
   });
 }

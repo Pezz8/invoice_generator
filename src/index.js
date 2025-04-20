@@ -1,8 +1,8 @@
-import * as xlsx from "xlsx";
-import puppeteer from "puppeteer";
-import moment from "moment";
-import fs from "fs";
-import path from "path";
+import * as xlsx from 'xlsx';
+import puppeteer from 'puppeteer';
+import moment from 'moment';
+import fs from 'fs';
+import path from 'path';
 xlsx.set_fs(fs);
 
 // Import the paths from the configuration file
@@ -14,25 +14,29 @@ import {
   sheetName,
   formattedToday,
   workOrderPath,
-} from "../config.js";
+} from '../config.js';
 
-import { getSheet } from "./reportFunctions.js";
+import { getSheet } from './reportFunctions.js';
 
-import { handleExistingPDF } from "./invoiceFunctions.js";
+import { handleExistingPDF } from './invoiceFunctions.js';
 
 import {
   replaceTemplatePlaceholders,
   readTemplate,
   invoiceDirectory,
   getInvoiceAndPath,
-} from "./invoiceFunctions.js";
-import { mergePDFs } from "./woMerger.js";
+} from './invoiceFunctions.js';
+import { mergePDFs } from './woMerger.js';
+import { config } from 'dotenv';
 
 // Loading templates
 const woTemplate = readTemplate(woTemplatePath);
 const kTemplate = readTemplate(kTemplatePath);
 const fTemplate = readTemplate(fTemplatePath);
 const templates = { woTemplate, kTemplate, fTemplate };
+
+// Load env
+config();
 
 // Main function
 async function generateInvoices() {
@@ -50,26 +54,26 @@ async function generateInvoices() {
 
   for (const row of rows) {
     const {
-      "Unit Number": unitNumber,
-      "Order Date": date,
-      "Invoice Number": invoiceNumber,
-      "Parts Cost": parts,
-      "Labor Cost": labor,
-      "Invoice Type": type,
+      'Unit Number': unitNumber,
+      'Order Date': date,
+      'Invoice Number': invoiceNumber,
+      'Parts Cost': parts,
+      'Labor Cost': labor,
+      'Invoice Type': type,
     } = row;
 
     // // Format date as MM-DD-YYYY
     // const formattedDate = moment(date).add(1, "day").format("L");
 
     let formattedDate;
-    if (typeof date === "number") {
+    if (typeof date === 'number') {
       // Handle Excel serial date
       formattedDate = moment(
         new Date((date - (25567 + 1)) * 86400 * 1000)
-      ).format("L");
+      ).format('L');
     } else {
       // If it's already a valid date, format it
-      formattedDate = moment(date).add(1, "day").format("L");
+      formattedDate = moment(date).add(1, 'day').format('L');
     }
 
     // Ensure parts and labor are numbers, defaulting to 0 if they are not valid
@@ -112,7 +116,7 @@ async function generateInvoices() {
     // Save the PDF to file
     await page.pdf({
       path: pdfPath,
-      format: "LETTER",
+      format: 'LETTER',
       printBackground: true,
     });
 

@@ -1,4 +1,4 @@
-import prisma from "./prismaClient.js";
+import prisma from './prismaClient.js';
 
 // Create a Person
 export async function createPerson(name, email) {

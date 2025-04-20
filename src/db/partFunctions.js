@@ -1,4 +1,4 @@
-import prisma from "./prismaClient.js";
+import prisma from './prismaClient.js';
 
 // Add a Part to an Invoice
 export async function addInvoicePart(invoiceId, partName, quantity, unitCost) {
