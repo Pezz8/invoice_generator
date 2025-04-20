@@ -9,10 +9,11 @@
   "scripts": {
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
-    "db:migrate-test": "dotenv -e .env.test -- prisma migrate deploy",
-    "test:integration": "dotenv -e .env.test -- node --experimental-vm-modules node_modules/jest/bin/jest.js -i",
-    "test": "dotenv -e .env.test -- npm run docker:up && npm run db:migrate-test && npm run test:integration",
-    "start": "npx babel-node src/index.js"
+    "test:migrate": "dotenv -e .env.test -- prisma migrate deploy",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js -i",
+    "start": "node src/index.js",
+    "dev": "node src/index.js",
+    "format": "prettier --write \"**/*.{js,json,md}\""
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.0",

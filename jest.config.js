@@ -1,8 +1,8 @@
-// jest.config.js
 export default {
+  setupFiles: ['./test/setupEnv.js'],
   transform: {},
-  testEnvironment: "node",
+  testEnvironment: 'node',
   moduleNameMapper: {
-    "^(\\.{1,2}/.*)\\.js$": "$1",
+    '^(\\.{1,2}/.*)\\.js$': '$1',
   },
 };
