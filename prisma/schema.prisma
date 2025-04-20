@@ -11,32 +11,34 @@ datasource db {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model invoice_parts {
   id         Int      @id @default(autoincrement())
-  invoice_id Int
+  invoice_uuid String
   part_name  String
   quantity   Int
   unit_cost  Decimal  @db.Decimal(10, 2)
-  total_cost Decimal? @default(dbgenerated("((quantity)::numeric * unit_cost)")) @db.Decimal(10, 2)
-  invoices   invoices @relation(fields: [invoice_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  total_cost Decimal
+  invoices   invoices @relation(fields: [invoice_uuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model invoices {
   id               Int               @id @default(autoincrement())
-  unit_id          Int
-  assignment_id    Int?
+  uuid             String            @unique
+  unit_uuid        String
+  assignment_uuid  String?
   invoice_type     String
   labor_hours      Decimal?          @db.Decimal(5, 2)
   labor_cost       Decimal?          @default(0) @db.Decimal(10, 2)
   parts_cost       Decimal?          @default(0) @db.Decimal(10, 2)
-  total_cost       Decimal?          @default(dbgenerated("(labor_cost + parts_cost)")) @db.Decimal(10, 2)
+  total_cost       Decimal
   job_date         DateTime          @db.Date
   created_at       DateTime?         @default(now()) @db.Timestamp(6)
   invoice_parts    invoice_parts[]
-  unit_assignments unit_assignments? @relation(fields: [assignment_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  units            units             @relation(fields: [unit_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  unit_assignments unit_assignments? @relation(fields: [assignment_uuid], references: [uuid], onDelete: NoAction, onUpdate: NoAction)
+  units            units             @relation(fields: [unit_uuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model people {
   id                 Int                  @id @default(autoincrement())
+  uuid               String            @unique
   name               String
   email              String               @unique
   bike_registrations bike_registrations[]
@@ -46,18 +48,20 @@ model people {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model unit_assignments {
   id         Int        @id @default(autoincrement())
-  unit_id    Int
-  person_id  Int
+  uuid       String            @unique
+  unit_uuid  String
+  person_uuid String
   role       Role
   active     Boolean?   @default(true)
   start_date DateTime?  @db.Date
   invoices   invoices[]
-  people     people     @relation(fields: [person_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  units      units      @relation(fields: [unit_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  people     people     @relation(fields: [person_uuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)
+  units      units      @relation(fields: [unit_uuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model units {
   id                 Int                  @id @default(autoincrement())
+  uuid               String            @unique
   unit_number        String               @unique
   affordable         Boolean              @default(false)
   bike_registrations bike_registrations[]
@@ -73,22 +77,24 @@ model parts {
 
 model bike_registrations {
   id                Int        @id @default(autoincrement())
-  person_id         Int
-  unit_id           Int
-  spot_id           Int
+  uuid              String            @unique
+  person_uuid       String
+  unit_uuid         String
+  spot_uuid         String
   make_model        String
   color             String
   registration_date DateTime   @default(now()) @db.Timestamp(6)
   fee_paid_date     DateTime   @db.Timestamp(6)
   next_due_date     DateTime   @db.Timestamp(6)
   active            Boolean    @default(true)
-  people            people     @relation(fields: [person_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  bike_spots        bike_spots @relation(fields: [spot_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  units             units      @relation(fields: [unit_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  people            people     @relation(fields: [person_uuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)
+  bike_spots        bike_spots @relation(fields: [spot_uuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)
+  units             units      @relation(fields: [unit_uuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model bike_spots {
   id                 Int                  @id @default(autoincrement())
+  uuid               String            @unique
   active             Boolean              @default(true)
   rack_position      rack_position
   bike_registrations bike_registrations[]
