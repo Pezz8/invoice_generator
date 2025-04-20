@@ -1,0 +1,6 @@
+node_modules
+generated
+build
+dist
+.next
+.DS_Store
