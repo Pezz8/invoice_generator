@@ -1,3 +1,4 @@
+import { errorHandler } from '../db/errorHandler';
 import prisma from '../db/prismaClient';
 
 export async function getAllUnits() {
@@ -5,9 +6,13 @@ export async function getAllUnits() {
 }
 
 export async function getUnitByNumber(unitNumber) {
-  return await prisma.units.findUnique({
-    where: {
-      unit_number: unitNumber,
-    },
-  });
+  try {
+    return await prisma.units.findUnique({
+      where: {
+        unit_number: unitNumber,
+      },
+    });
+  } catch (e) {
+    return errorHandler(e);
+  }
 }

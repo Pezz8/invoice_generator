@@ -37,4 +37,10 @@ describe('getUnitByNumber', () => {
     const actual = await getUnitByNumber('doesnt exist');
     expect(actual).toEqual(null);
   });
+
+  it('should return an error if called with bad input', async () => {
+    const actual = await getUnitByNumber(1);
+    console.log(actual);
+    expect(actual.message).toEqual('Invalid data provided');
+  });
 });
