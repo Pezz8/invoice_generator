@@ -40,7 +40,6 @@ describe('getUnitByNumber', () => {
 
   it('should return an error if called with bad input', async () => {
     const actual = await getUnitByNumber(1);
-    console.log(actual);
     expect(actual.message).toEqual('Invalid data provided');
   });
 });
