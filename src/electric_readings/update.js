@@ -1,0 +1,13 @@
+import prisma from '../db/prismaClient.js';
+
+/**
+ * Update a reading by UUID.
+ * @param {string} readingUuid
+ * @param {Object} updates
+ */
+export async function updateElectricReading(readingUuid, updates) {
+  return await prisma.electric_readings.update({
+    where: { uuid: readingUuid },
+    data: updates,
+  });
+}

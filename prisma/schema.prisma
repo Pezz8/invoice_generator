@@ -8,7 +8,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model invoice_parts {
   id           Int      @id @default(autoincrement())
   invoice_uuid String
@@ -46,7 +45,31 @@ model people {
   unit_assignments   unit_assignments[]
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model electric_meters {
+  id         Int     @id @default(autoincrement())
+  uuid       String  @unique @default(uuid())
+  unit_uuid  String
+  meter_name String
+  active     Boolean @default(true)
+
+  units    units               @relation(fields: [unit_uuid], references: [uuid], onDelete: Cascade)
+  readings electric_readings[]
+
+  created_at DateTime @default(now()) @db.Timestamp(6)
+}
+
+model electric_readings {
+  id            Int      @id @default(autoincrement())
+  uuid          String   @unique @default(uuid())
+  meter_uuid    String
+  reading_date  DateTime @db.Date
+  reading_value Decimal  @db.Decimal(10, 2)
+
+  electric_meters electric_meters @relation(fields: [meter_uuid], references: [uuid], onDelete: Cascade)
+
+  created_at DateTime @default(now()) @db.Timestamp(6)
+}
+
 model unit_assignments {
   id          Int        @id @default(autoincrement())
   uuid        String     @unique
@@ -65,9 +88,11 @@ model units {
   uuid               String               @unique
   unit_number        String               @unique
   affordable         Boolean              @default(false)
+  active             Boolean              @default(true)
   bike_registrations bike_registrations[]
   invoices           invoices[]
   unit_assignments   unit_assignments[]
+  electric_meters    electric_meters[]
 }
 
 model parts {
