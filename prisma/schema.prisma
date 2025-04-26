@@ -10,13 +10,13 @@ datasource db {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model invoice_parts {
-  id         Int      @id @default(autoincrement())
+  id           Int      @id @default(autoincrement())
   invoice_uuid String
-  part_name  String
-  quantity   Int
-  unit_cost  Decimal  @db.Decimal(10, 2)
-  total_cost Decimal
-  invoices   invoices @relation(fields: [invoice_uuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)
+  part_name    String
+  quantity     Int
+  unit_cost    Decimal  @db.Decimal(10, 2)
+  total_cost   Decimal
+  invoices     invoices @relation(fields: [invoice_uuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model invoices {
@@ -38,30 +38,31 @@ model invoices {
 
 model people {
   id                 Int                  @id @default(autoincrement())
-  uuid               String            @unique
+  uuid               String               @unique
   name               String
   email              String               @unique
+  active             Boolean              @default(true)
   bike_registrations bike_registrations[]
   unit_assignments   unit_assignments[]
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model unit_assignments {
-  id         Int        @id @default(autoincrement())
-  uuid       String            @unique
-  unit_uuid  String
+  id          Int        @id @default(autoincrement())
+  uuid        String     @unique
+  unit_uuid   String
   person_uuid String
-  role       Role
-  active     Boolean?   @default(true)
-  start_date DateTime?  @db.Date
-  invoices   invoices[]
-  people     people     @relation(fields: [person_uuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)
-  units      units      @relation(fields: [unit_uuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)
+  role        Role
+  active      Boolean?   @default(true)
+  start_date  DateTime?  @db.Date
+  invoices    invoices[]
+  people      people     @relation(fields: [person_uuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)
+  units       units      @relation(fields: [unit_uuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model units {
   id                 Int                  @id @default(autoincrement())
-  uuid               String            @unique
+  uuid               String               @unique
   unit_number        String               @unique
   affordable         Boolean              @default(false)
   bike_registrations bike_registrations[]
@@ -77,7 +78,7 @@ model parts {
 
 model bike_registrations {
   id                Int        @id @default(autoincrement())
-  uuid              String            @unique
+  uuid              String     @unique
   person_uuid       String
   unit_uuid         String
   spot_uuid         String
@@ -94,7 +95,7 @@ model bike_registrations {
 
 model bike_spots {
   id                 Int                  @id @default(autoincrement())
-  uuid               String            @unique
+  uuid               String               @unique
   active             Boolean              @default(true)
   rack_position      rack_position
   bike_registrations bike_registrations[]

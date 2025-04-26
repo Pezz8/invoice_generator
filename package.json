@@ -10,6 +10,7 @@
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
     "test:migrate": "dotenv -e .env.test -- prisma migrate deploy",
+    "dev:migrate": "dotenv -e .env.development -- prisma migrate deploy",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js -i",
     "start": "node src/index.js",
     "dev": "node src/index.js",
