@@ -58,16 +58,34 @@ model electric_meters {
   created_at DateTime @default(now()) @db.Timestamp(6)
 }
 
+model electricity_invoices {
+  id              Int      @id @default(autoincrement())
+  uuid            String   @unique @default(uuid())
+  unit_uuid       String
+  billing_start   DateTime @db.Date
+  billing_end     DateTime @db.Date
+  total_usage     Decimal  @db.Decimal(10, 2)
+  supply_charge   Decimal  @db.Decimal(10, 2)
+  delivery_charge Decimal  @db.Decimal(10, 2)
+  total_charge    Decimal  @db.Decimal(10, 2)
+  created_at      DateTime @default(now()) @db.Timestamp(6)
+
+  units             units               @relation(fields: [unit_uuid], references: [uuid], onDelete: Cascade)
+  electric_readings electric_readings[] // <-- New relation
+}
+
 model electric_readings {
   id            Int      @id @default(autoincrement())
   uuid          String   @unique @default(uuid())
   meter_uuid    String
   reading_date  DateTime @db.Date
   reading_value Decimal  @db.Decimal(10, 2)
-
-  electric_meters electric_meters @relation(fields: [meter_uuid], references: [uuid], onDelete: Cascade)
+  invoice_uuid  String? // <-- New field (optional)
 
   created_at DateTime @default(now()) @db.Timestamp(6)
+
+  electric_meters      electric_meters       @relation(fields: [meter_uuid], references: [uuid], onDelete: Cascade)
+  electricity_invoices electricity_invoices? @relation(fields: [invoice_uuid], references: [uuid], onDelete: SetNull)
 }
 
 model unit_assignments {
@@ -84,15 +102,16 @@ model unit_assignments {
 }
 
 model units {
-  id                 Int                  @id @default(autoincrement())
-  uuid               String               @unique
-  unit_number        String               @unique
-  affordable         Boolean              @default(false)
-  active             Boolean              @default(true)
-  bike_registrations bike_registrations[]
-  invoices           invoices[]
-  unit_assignments   unit_assignments[]
-  electric_meters    electric_meters[]
+  id                   Int                    @id @default(autoincrement())
+  uuid                 String                 @unique
+  unit_number          String                 @unique
+  affordable           Boolean                @default(false)
+  active               Boolean                @default(true)
+  bike_registrations   bike_registrations[]
+  invoices             invoices[]
+  unit_assignments     unit_assignments[]
+  electric_meters      electric_meters[]
+  electricity_invoices electricity_invoices[]
 }
 
 model parts {
