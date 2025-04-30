@@ -1,6 +1,11 @@
 node_modules/
-invoices/
+/invoices/
 resources/report.xlsx
-resources/~$report.xlsx
 resources/regatta_invoices_templates/
+resources/work_orders/*
 r_index.js
+.env.development
+.env.test
+generated/prisma/
+generated/.DS_Store
+.DS_Store
