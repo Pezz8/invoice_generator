@@ -30,7 +30,7 @@ describe('getUnitByNumber', () => {
       createUnit('3'),
     ]);
     const actual = await getUnitByNumber(unitNumber);
-    expect(actual.unit_number).toBe(unitNumber);
+    expect(actual.unitNumber).toBe(unitNumber);
   });
 
   it('should return null if no units exist with unitNumber', async () => {

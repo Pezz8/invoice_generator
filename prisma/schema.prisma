@@ -9,140 +9,140 @@ datasource db {
 }
 
 model invoice_parts {
-  id           Int      @id @default(autoincrement())
-  invoice_uuid String
-  part_name    String
-  quantity     Int
-  unit_cost    Decimal  @db.Decimal(10, 2)
-  total_cost   Decimal
-  invoices     invoices @relation(fields: [invoice_uuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)
+  id          Int      @id @default(autoincrement())
+  invoiceUuid String   @map("invoice_uuid")
+  partName    String   @map("part_name")
+  quantity    Int
+  unitCost    Decimal  @map("unit_cost") @db.Decimal(10, 2)
+  totalCost   Decimal  @map("total_cost")
+  invoices    invoices @relation(fields: [invoiceUuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model invoices {
-  id               Int               @id @default(autoincrement())
-  uuid             String            @unique
-  unit_uuid        String
-  assignment_uuid  String?
-  invoice_type     String
-  labor_hours      Decimal?          @db.Decimal(5, 2)
-  labor_cost       Decimal?          @default(0) @db.Decimal(10, 2)
-  parts_cost       Decimal?          @default(0) @db.Decimal(10, 2)
-  total_cost       Decimal
-  job_date         DateTime          @db.Date
-  created_at       DateTime?         @default(now()) @db.Timestamp(6)
-  invoice_parts    invoice_parts[]
-  unit_assignments unit_assignments? @relation(fields: [assignment_uuid], references: [uuid], onDelete: NoAction, onUpdate: NoAction)
-  units            units             @relation(fields: [unit_uuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)
+  id             Int               @id @default(autoincrement())
+  uuid           String            @unique
+  unitUuid       String            @map("unit_uuid")
+  assignmentUuid String?           @map("assignment_uuid")
+  invoiceType    String            @map("invoice_type")
+  laborHours     Decimal?          @map("labor_hours") @db.Decimal(5, 2)
+  laborCost      Decimal?          @default(0) @map("labor_cost") @db.Decimal(10, 2)
+  partsCost      Decimal?          @default(0) @map("parts_cost") @db.Decimal(10, 2)
+  totalCost      Decimal           @map("total_cost")
+  jobDate        DateTime          @map("job_date") @db.Date
+  createdAt      DateTime?         @default(now()) @map("created_at") @db.Timestamp(6)
+  invoiceParts   invoice_parts[]
+  unitAssignment unit_assignments? @relation(fields: [assignmentUuid], references: [uuid], onDelete: NoAction, onUpdate: NoAction)
+  units          units             @relation(fields: [unitUuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model people {
-  id                 Int                  @id @default(autoincrement())
-  uuid               String               @unique
-  name               String
-  email              String               @unique
-  active             Boolean              @default(true)
-  bike_registrations bike_registrations[]
-  unit_assignments   unit_assignments[]
+  id                Int                  @id @default(autoincrement())
+  uuid              String               @unique
+  name              String
+  email             String               @unique
+  active            Boolean              @default(true)
+  bikeRegistrations bike_registrations[]
+  unitAssignments   unit_assignments[]
 }
 
 model electric_meters {
-  id         Int     @id @default(autoincrement())
-  uuid       String  @unique @default(uuid())
-  unit_uuid  String
-  meter_name String
-  active     Boolean @default(true)
+  id        Int     @id @default(autoincrement())
+  uuid      String  @unique @default(uuid())
+  unitUuid  String  @map("unit_uuid")
+  meterName String  @map("meter_name")
+  active    Boolean @default(true)
 
-  units    units               @relation(fields: [unit_uuid], references: [uuid], onDelete: Cascade)
+  units    units               @relation(fields: [unitUuid], references: [uuid], onDelete: Cascade)
   readings electric_readings[]
 
-  created_at DateTime @default(now()) @db.Timestamp(6)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
 }
 
 model electricity_invoices {
-  id              Int      @id @default(autoincrement())
-  uuid            String   @unique @default(uuid())
-  unit_uuid       String
-  billing_start   DateTime @db.Date
-  billing_end     DateTime @db.Date
-  total_usage     Decimal  @db.Decimal(10, 2)
-  supply_charge   Decimal  @db.Decimal(10, 2)
-  delivery_charge Decimal  @db.Decimal(10, 2)
-  total_charge    Decimal  @db.Decimal(10, 2)
-  created_at      DateTime @default(now()) @db.Timestamp(6)
+  id             Int      @id @default(autoincrement())
+  uuid           String   @unique @default(uuid())
+  unitUuid       String   @map("unit_uuid")
+  billingStart   DateTime @map("billing_start") @db.Date
+  billingEnd     DateTime @map("billing_end") @db.Date
+  totalUsage     Decimal  @map("total_usage") @db.Decimal(10, 2)
+  supplyCharge   Decimal  @map("supply_charge") @db.Decimal(10, 2)
+  deliveryCharge Decimal  @map("delivery_charge") @db.Decimal(10, 2)
+  totalCharge    Decimal  @map("total_charge") @db.Decimal(10, 2)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamp(6)
 
-  units             units               @relation(fields: [unit_uuid], references: [uuid], onDelete: Cascade)
-  electric_readings electric_readings[] // <-- New relation
+  units            units               @relation(fields: [unitUuid], references: [uuid], onDelete: Cascade)
+  electricReadings electric_readings[] // <-- New relation
 }
 
 model electric_readings {
-  id            Int      @id @default(autoincrement())
-  uuid          String   @unique @default(uuid())
-  meter_uuid    String
-  reading_date  DateTime @db.Date
-  reading_value Decimal  @db.Decimal(10, 2)
-  invoice_uuid  String? // <-- New field (optional)
+  id           Int      @id @default(autoincrement())
+  uuid         String   @unique @default(uuid())
+  meterUuid    String   @map("meter_uuid")
+  readingDate  DateTime @map("reading_date") @db.Date
+  readingValue Decimal  @map("reading_value") @db.Decimal(10, 2)
+  invoiceUuid  String?  @map("invoice_uuid")
 
-  created_at DateTime @default(now()) @db.Timestamp(6)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
 
-  electric_meters      electric_meters       @relation(fields: [meter_uuid], references: [uuid], onDelete: Cascade)
-  electricity_invoices electricity_invoices? @relation(fields: [invoice_uuid], references: [uuid], onDelete: SetNull)
+  electricMeter      electric_meters       @relation(fields: [meterUuid], references: [uuid], onDelete: Cascade)
+  electricityInvoice electricity_invoices? @relation(fields: [invoiceUuid], references: [uuid], onDelete: SetNull)
 }
 
 model unit_assignments {
-  id          Int        @id @default(autoincrement())
-  uuid        String     @unique
-  unit_uuid   String
-  person_uuid String
-  role        Role
-  active      Boolean?   @default(true)
-  start_date  DateTime?  @db.Date
-  invoices    invoices[]
-  people      people     @relation(fields: [person_uuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)
-  units       units      @relation(fields: [unit_uuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)
+  id         Int        @id @default(autoincrement())
+  uuid       String     @unique
+  unitUuid   String     @map("unit_uuid")
+  personUuid String     @map("person_uuid")
+  role       Role
+  active     Boolean?   @default(true)
+  startDate  DateTime?  @map("start_date") @db.Date
+  invoices   invoices[]
+  people     people     @relation(fields: [personUuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)
+  units      units      @relation(fields: [unitUuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model units {
-  id                   Int                    @id @default(autoincrement())
-  uuid                 String                 @unique
-  unit_number          String                 @unique
-  affordable           Boolean                @default(false)
-  active               Boolean                @default(true)
-  bike_registrations   bike_registrations[]
-  invoices             invoices[]
-  unit_assignments     unit_assignments[]
-  electric_meters      electric_meters[]
-  electricity_invoices electricity_invoices[]
+  id                  Int                    @id @default(autoincrement())
+  uuid                String                 @unique
+  unitNumber          String                 @unique @map("unit_number")
+  affordable          Boolean                @default(false)
+  active              Boolean                @default(true)
+  bikeRegistrations   bike_registrations[]
+  invoices            invoices[]
+  unitAssignments     unit_assignments[]
+  electricMeters      electric_meters[]
+  electricityInvoices electricity_invoices[]
 }
 
 model parts {
-  id        Int     @id @default(autoincrement())
-  name      String  @unique
-  unit_cost Decimal @db.Decimal(10, 2)
+  id       Int     @id @default(autoincrement())
+  name     String  @unique
+  unitCost Decimal @map("unit_cost") @db.Decimal(10, 2)
 }
 
 model bike_registrations {
-  id                Int        @id @default(autoincrement())
-  uuid              String     @unique
-  person_uuid       String
-  unit_uuid         String
-  spot_uuid         String
-  make_model        String
-  color             String
-  registration_date DateTime   @default(now()) @db.Timestamp(6)
-  fee_paid_date     DateTime   @db.Timestamp(6)
-  next_due_date     DateTime   @db.Timestamp(6)
-  active            Boolean    @default(true)
-  people            people     @relation(fields: [person_uuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)
-  bike_spots        bike_spots @relation(fields: [spot_uuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)
-  units             units      @relation(fields: [unit_uuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)
+  id               Int        @id @default(autoincrement())
+  uuid             String     @unique
+  personUuid       String     @map("person_uuid")
+  unitUuid         String     @map("unit_uuid")
+  spotUuid         String     @map("spot_uuid")
+  makeModel        String     @map("make_model")
+  color            String
+  registrationDate DateTime   @default(now()) @map("registration_date") @db.Timestamp(6)
+  feePaidDate      DateTime   @map("fee_paid_date") @db.Timestamp(6)
+  nextDueDate      DateTime   @map("next_due_date") @db.Timestamp(6)
+  active           Boolean    @default(true)
+  person           people     @relation(fields: [personUuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)
+  bikeSpot         bike_spots @relation(fields: [spotUuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)
+  unit             units      @relation(fields: [unitUuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model bike_spots {
-  id                 Int                  @id @default(autoincrement())
-  uuid               String               @unique
-  active             Boolean              @default(true)
-  rack_position      rack_position
-  bike_registrations bike_registrations[]
+  id                Int                  @id @default(autoincrement())
+  uuid              String               @unique
+  active            Boolean              @default(true)
+  rackPosition      rack_position        @map("rack_position")
+  bikeRegistrations bike_registrations[]
 }
 
 enum Role {
