@@ -9,7 +9,7 @@ export async function getUnitByNumber(unitNumber) {
   try {
     return await prisma.units.findUnique({
       where: {
-        unit_number: unitNumber,
+        unitNumber,
       },
     });
   } catch (e) {

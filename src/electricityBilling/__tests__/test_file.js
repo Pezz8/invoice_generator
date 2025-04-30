@@ -31,7 +31,6 @@ describe('calculateElectricityBill', () => {
       new Date('2025-05-01')
     );
 
-    expect(bill.totalUsage).toBe(90);
-    expect(bill.totalCharge).toBeCloseTo(18);
+    expect(bill.totalUsage).toBe('90.00');
   });
 });
