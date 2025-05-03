@@ -19,14 +19,7 @@ export async function createElectricityInvoiceForUnit(
   const meters = await prisma.electricMeters.findMany({
     where: { unitUuid: unitUuid, active: true },
     include: {
-      readings: {
-        where: {
-          readingDate: {
-            gte: startDate,
-            lte: endDate,
-          },
-        },
-      },
+      readings: true,
     },
   });
 

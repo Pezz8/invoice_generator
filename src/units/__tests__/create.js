@@ -11,3 +11,9 @@ it('should create a new unit with a unit number', async () => {
   const actual = await createUnit(unitNumber);
   expect(actual?.unitNumber).toBe(unitNumber);
 });
+
+it('should create unit "test"', async () => {
+  const unitNumber = 'test';
+  const actual = await createUnit(unitNumber);
+  expect(actual?.unitNumber).toBe(unitNumber);
+});
