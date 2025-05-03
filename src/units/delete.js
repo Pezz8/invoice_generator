@@ -11,16 +11,3 @@ export async function deleteUnit(unitUuid) {
     where: { uuid: unitUuid },
   });
 }
-
-/**
- * Soft delete a unit by UUID.
- * Marks the unit as inactive instead of removing it from the database.
- *
- * @param {string} unitUuid - The UUID of the unit to deactivate.
- */
-export async function softDeleteUnit(unitUuid) {
-  return await prisma.units.update({
-    where: { uuid: unitUuid },
-    data: { active: false },
-  });
-}

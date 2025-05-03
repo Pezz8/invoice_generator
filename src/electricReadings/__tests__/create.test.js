@@ -1,7 +1,8 @@
 import { randomUUID } from 'crypto';
 import prisma from '../../db/prismaClient.js';
 import { createElectricReading } from '../create.js';
-import { insertUnitWithMeter } from '../../../test/factory.js';
+import { createElectricMeter } from '../../electricMeters/create.js';
+import { createUnit } from '../../units/create.js';
 
 afterAll(async () => {
   await prisma.electricMeters.deleteMany();
@@ -11,7 +12,8 @@ afterAll(async () => {
 
 describe('Electric Reading Creation', () => {
   it('should create a reading for Meter 1', async () => {
-    const { unit, meter } = await insertUnitWithMeter('3Q', 'Meter 1');
+    const unit = await createUnit('3Q');
+    const meter = await createElectricMeter(unit.uuid, 'Meter 1');
     const readingDate = new Date('2025-01-01');
     const readingValue = 70983;
 

@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 import prisma from '../../db/prismaClient.js';
 import { createElectricMeter } from '../../electricMeters/create.js';
-import { insertUnit } from '../../../test/factory.js';
+import { createUnit } from '../../units/create.js';
 
 afterAll(async () => {
   await prisma.electricMeters.deleteMany();
@@ -11,7 +11,7 @@ afterAll(async () => {
 
 describe('Electric Meter Creation', () => {
   it('should create a reading for Meter 1', async () => {
-    const unit = await insertUnit('3Q');
+    const unit = await createUnit('3Q');
     const meterName = 'Meter 1';
     const actual = await createElectricMeter(unit.uuid, meterName);
 
