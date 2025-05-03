@@ -1,8 +1,7 @@
 import { randomUUID } from 'crypto';
 import prisma from '../../db/prismaClient.js';
 import { createElectricReading } from '../create.js';
-import { createElectricMeter } from '../../electricMeters/create.js';
-import { createUnit } from '../../units/create.js';
+import { insertUnitWithMeter } from '../../../test/factory.js';
 
 afterAll(async () => {
   await prisma.electricMeters.deleteMany();
@@ -10,27 +9,19 @@ afterAll(async () => {
   await prisma.$disconnect();
 });
 
-// TODo
-// Use the functions instead of raw prisma
-// Clean the data after the test ends
-
 describe('Electric Reading Creation', () => {
   it('should create a reading for Meter 1', async () => {
-    const testUnitName = '3Q';
-    const testUnit = await createUnit(testUnitName);
-    const testUnitUuid = await testUnit.uuid;
-    const electricMeter = createElectricMeter(testUnitUuid, 'Meter 1');
-    const electricMeterUuid = (await electricMeter).uuid;
+    const { unit, meter } = await insertUnitWithMeter('3Q', 'Meter 1');
     const readingDate = new Date('2025-01-01');
     const readingValue = 70983;
 
     const actual = await createElectricReading(
-      electricMeterUuid,
+      meter.uuid,
       readingDate,
       readingValue
     );
 
-    expect(actual?.meterUuid).toBe(electricMeterUuid);
+    expect(actual?.meterUuid).toBe(meter.uuid);
     expect(actual?.readingDate.getTime()).toBe(readingDate.getTime());
     expect(Number(actual?.readingValue)).toBe(readingValue);
   });
