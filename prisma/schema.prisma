@@ -21,6 +21,7 @@ model invoice_parts {
 model invoices {
   id             Int               @id @default(autoincrement())
   uuid           String            @unique
+  invoiceNumber  String            @unique @map("invoice_number")
   unitUuid       String            @map("unit_uuid")
   assignmentUuid String?           @map("assignment_uuid")
   invoiceType    String            @map("invoice_type")
@@ -29,6 +30,7 @@ model invoices {
   partsCost      Decimal?          @default(0) @map("parts_cost") @db.Decimal(10, 2)
   totalCost      Decimal           @map("total_cost")
   jobDate        DateTime          @map("job_date") @db.Date
+  active         Boolean           @default(true)
   createdAt      DateTime?         @default(now()) @map("created_at") @db.Timestamp(6)
   invoiceParts   invoice_parts[]
   unitAssignment unit_assignments? @relation(fields: [assignmentUuid], references: [uuid], onDelete: NoAction, onUpdate: NoAction)
