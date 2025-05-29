@@ -21,20 +21,22 @@ model invoiceParts {
 }
 
 model invoices {
-  id             Int              @id @default(autoincrement())
-  uuid           String           @unique
-  unitUuid       String           @map("unit_uuid")
-  assignmentUuid String?          @map("assignment_uuid")
-  invoiceType    String           @map("invoice_type")
-  laborHours     Decimal?         @map("labor_hours") @db.Decimal(5, 2)
-  laborCost      Decimal?         @default(0) @map("labor_cost") @db.Decimal(10, 2)
-  partsCost      Decimal?         @default(0) @map("parts_cost") @db.Decimal(10, 2)
-  totalCost      Decimal          @map("total_cost")
-  jobDate        DateTime         @map("job_date") @db.Date
-  createdAt      DateTime?        @default(now()) @map("created_at") @db.Timestamp(6)
-  invoiceParts   invoiceParts[]
-  unitAssignment unitAssignments? @relation(fields: [assignmentUuid], references: [uuid], onDelete: NoAction, onUpdate: NoAction)
-  units          units            @relation(fields: [unitUuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)
+  id             Int               @id @default(autoincrement())
+  uuid           String            @unique
+  invoiceNumber  String            @unique @map("invoice_number")
+  unitUuid       String            @map("unit_uuid")
+  assignmentUuid String?           @map("assignment_uuid")
+  invoiceType    String            @map("invoice_type")
+  laborHours     Decimal?          @map("labor_hours") @db.Decimal(5, 2)
+  laborCost      Decimal?          @default(0) @map("labor_cost") @db.Decimal(10, 2)
+  partsCost      Decimal?          @default(0) @map("parts_cost") @db.Decimal(10, 2)
+  totalCost      Decimal           @map("total_cost")
+  jobDate        DateTime          @map("job_date") @db.Date
+  active         Boolean           @default(true)
+  createdAt      DateTime?         @default(now()) @map("created_at") @db.Timestamp(6)
+  invoiceParts   invoice_parts[]
+  unitAssignment unit_assignments? @relation(fields: [assignmentUuid], references: [uuid], onDelete: NoAction, onUpdate: NoAction)
+  units          units             @relation(fields: [unitUuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model people {
