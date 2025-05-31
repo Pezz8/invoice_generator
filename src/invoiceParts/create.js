@@ -1,8 +1,8 @@
-import prisma from '../../db/prismaClient.js';
+import prisma from '../db/prismaClient.js';
 import { randomUUID } from 'crypto';
 
 export async function createInvoicePart(data) {
-  return await prisma.invoiceParts.create({
+  return await prisma.invoice_parts.create({
     data: {
       uuid: randomUUID(),
       ...data,

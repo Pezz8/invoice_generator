@@ -20,6 +20,7 @@ describe('createInvoice', () => {
     const invoiceData = {
       unitUuid: testUnit.uuid,
       invoiceType: 'standard',
+      invoiceNumber: '1234',
       jobDate: new Date('2025-05-29'),
       totalCost: 100.0,
     };
