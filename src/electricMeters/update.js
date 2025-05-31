@@ -6,7 +6,7 @@ import prisma from '../db/prismaClient.js';
  * @param {Object} updates
  */
 export async function updateElectricMeter(meterUuid, updates) {
-  return await prisma.electricMeters.update({
+  return await prisma.electric_meters.update({
     where: { uuid: meterUuid },
     data: updates,
   });
