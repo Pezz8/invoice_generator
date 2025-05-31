@@ -5,7 +5,7 @@ import prisma from '../db/prismaClient.js';
  * @param {string} readingUuid
  */
 export async function deleteElectricReading(readingUuid) {
-  return await prisma.electricReadings.delete({
+  return await prisma.electric_readings.delete({
     where: { uuid: readingUuid },
   });
 }
