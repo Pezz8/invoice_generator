@@ -4,7 +4,7 @@ import prisma from '../db/prismaClient';
 // Get all unit assignments
 export async function getAllUnitAssignments() {
   try {
-    return await prisma.unitAssignments.findMany();
+    return await prisma.unit_assignments.findMany();
   } catch (e) {
     return errorHandler(e);
   }
@@ -13,7 +13,7 @@ export async function getAllUnitAssignments() {
 // Find assignment by UUID
 export async function getUnitAssignmentByUUID(assignmentUuid) {
   try {
-    return await prisma.unitAssignments.findUnique({
+    return await prisma.unit_assignments.findUnique({
       where: { uuid: assignmentUuid },
     });
   } catch (e) {
@@ -24,7 +24,7 @@ export async function getUnitAssignmentByUUID(assignmentUuid) {
 // List assignments for a specific unit (by unit UUID)
 export async function getAssignmentsByUnitUUID(unitUuid) {
   try {
-    return await prisma.unitAssignments.findMany({
+    return await prisma.unit_assignments.findMany({
       where: { unitUuid: unitUuid },
     });
   } catch (e) {
@@ -35,7 +35,7 @@ export async function getAssignmentsByUnitUUID(unitUuid) {
 // List assignments for a specific person (by person UUID)
 export async function getAssignmentsByPersonUUID(personUuid) {
   try {
-    return await prisma.unitAssignments.findMany({
+    return await prisma.unit_assignments.findMany({
       where: { personUuid: personUuid },
     });
   } catch (e) {

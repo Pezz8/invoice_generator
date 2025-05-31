@@ -6,7 +6,7 @@ import prisma from '../db/prismaClient.js';
  * @param {Object} updates - Fields to update (role, etc.)
  */
 export async function updateUnitAssignment(assignmentUuid, updates) {
-  return await prisma.unitAssignments.update({
+  return await prisma.unit_assignments.update({
     where: { uuid: assignmentUuid },
     data: updates,
   });
