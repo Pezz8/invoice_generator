@@ -6,7 +6,7 @@ import prisma from '../db/prismaClient.js';
  * @param {Object} meterData - { unitUuid, meterName }
  */
 export async function createElectricMeter(meterData) {
-  return await prisma.electricMeters.create({
+  return await prisma.electric_meters.create({
     data: {
       uuid: randomUUID(),
       ...meterData,
