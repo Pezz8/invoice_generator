@@ -1,17 +1,17 @@
-import prisma from '../../db/prismaClient.js';
+import prisma from '../db/prismaClient.js';
 
 export async function getInvoicePartByUuid(uuid) {
-  return await prisma.invoiceParts.findUnique({
+  return await prisma.invoice_parts.findUnique({
     where: { uuid },
   });
 }
 
 export async function getInvoicePartsByInvoiceUuid(invoiceUuid) {
-  return await prisma.invoiceParts.findMany({
+  return await prisma.invoice_parts.findMany({
     where: { invoiceUuid },
   });
 }
 
 export async function getAllInvoiceParts() {
-  return await prisma.invoiceParts.findMany();
+  return await prisma.invoice_parts.findMany();
 }

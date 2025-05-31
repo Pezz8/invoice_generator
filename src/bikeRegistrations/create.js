@@ -6,7 +6,7 @@ import prisma from '../db/prismaClient.js';
  * @param {Object} bikeData - Required fields: personUuid, unitUuid, spotUuid, makeModel, color, feePaidDate
  */
 export async function createBikeRegistration(bikeData) {
-  return await prisma.bikeRegistrations.create({
+  return await prisma.bike_registrations.create({
     data: {
       uuid: randomUUID(),
       ...bikeData,

@@ -5,8 +5,8 @@ import prisma from '../db/prismaClient.js';
  * @param {string} invoiceUuid
  * @param {Object} updates
  */
-export async function updateElectricityInvoice(invoiceUuid, updates) {
-  return await prisma.electricityInvoices.update({
+export async function updateElectricityInvoiceByUUID(invoiceUuid, updates) {
+  return await prisma.electricity_invoices.update({
     where: { uuid: invoiceUuid },
     data: updates,
   });

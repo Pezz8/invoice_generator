@@ -4,7 +4,7 @@ import prisma from '../db/prismaClient';
 // Get all bike registrations
 export async function getAllBikeRegistrations() {
   try {
-    return await prisma.bikeRegistrations.findMany();
+    return await prisma.bike_registrations.findMany();
   } catch (e) {
     return errorHandler(e);
   }
@@ -13,7 +13,7 @@ export async function getAllBikeRegistrations() {
 // Find bike registration by UUID
 export async function getBikeRegistrationByUUID(bikeUuid) {
   try {
-    return await prisma.bikeRegistrations.findUnique({
+    return await prisma.bike_registrations.findUnique({
       where: { uuid: bikeUuid },
     });
   } catch (e) {
@@ -24,7 +24,7 @@ export async function getBikeRegistrationByUUID(bikeUuid) {
 // List all bikes registered to a person
 export async function getBikeRegistrationsByPersonUUID(personUuid) {
   try {
-    return await prisma.bikeRegistrations.findMany({
+    return await prisma.bike_registrations.findMany({
       where: { personUuid: personUuid },
     });
   } catch (e) {
@@ -35,7 +35,7 @@ export async function getBikeRegistrationsByPersonUUID(personUuid) {
 // List all bikes assigned to a unit
 export async function getBikeRegistrationsByUnitUUID(unitUuid) {
   try {
-    return await prisma.bikeRegistrations.findMany({
+    return await prisma.bike_registrations.findMany({
       where: { unitUuid: unitUuid },
     });
   } catch (e) {
@@ -46,7 +46,7 @@ export async function getBikeRegistrationsByUnitUUID(unitUuid) {
 // List all active bike registrations (if using active = true for renewals)
 export async function getActiveBikeRegistrations() {
   try {
-    return await prisma.bikeRegistrations.findMany({
+    return await prisma.bike_registrations.findMany({
       where: { active: true },
     });
   } catch (e) {

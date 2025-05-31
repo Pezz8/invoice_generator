@@ -4,7 +4,7 @@ import { errorHandler } from '../db/errorHandler';
 // Get all readings
 export async function getAllElectricReadings() {
   try {
-    return await prisma.electricReadings.findMany();
+    return await prisma.electric_readings.findMany();
   } catch (e) {
     return errorHandler(e);
   }
@@ -13,7 +13,7 @@ export async function getAllElectricReadings() {
 // Find reading by UUID
 export async function getElectricReadingByUUID(readingUuid) {
   try {
-    return await prisma.electricReadings.findUnique({
+    return await prisma.electric_readings.findUnique({
       where: { uuid: readingUuid },
     });
   } catch (e) {
@@ -24,7 +24,7 @@ export async function getElectricReadingByUUID(readingUuid) {
 // List all readings for a specific meter
 export async function getElectricReadingsByMeterUUID(meterUuid) {
   try {
-    return await prisma.electricReadings.findMany({
+    return await prisma.electric_readings.findMany({
       where: { meterUuid: meterUuid },
       orderBy: { readingDate: 'asc' }, // Order readings chronologically
     });
