@@ -1,7 +1,7 @@
-import prisma from '../../db/prismaClient.js';
+import prisma from '../db/prismaClient.js';
 
-export async function updateInvoicePart(uuid, updates) {
-  return await prisma.invoiceParts.update({
+export async function updateInvoicePartByUUID(uuid, updates) {
+  return await prisma.invoice_parts.update({
     where: { uuid },
     data: updates,
   });

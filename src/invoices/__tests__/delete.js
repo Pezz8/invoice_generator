@@ -13,6 +13,7 @@ describe('deleteInvoiceByUUID', () => {
     testInvoice = await createInvoice({
       unitUuid: testUnit.uuid,
       invoiceType: 'standard',
+      invoiceNumber: '54321',
       jobDate: new Date('2025-05-29'),
       totalCost: 150.0,
     });

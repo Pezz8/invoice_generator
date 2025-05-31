@@ -10,28 +10,29 @@ datasource db {
 
 model invoice_parts {
   id          Int      @id @default(autoincrement())
-  invoiceUuid String   @map("invoice_uuid")
   partName    String   @map("part_name")
   quantity    Int
   unitCost    Decimal  @map("unit_cost") @db.Decimal(10, 2)
   totalCost   Decimal  @map("total_cost")
+  invoiceUuid String   @map("invoice_uuid")
+  uuid        String   @unique
   invoices    invoices @relation(fields: [invoiceUuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model invoices {
   id             Int               @id @default(autoincrement())
   uuid           String            @unique
-  invoiceNumber  String            @unique @map("invoice_number")
-  unitUuid       String            @map("unit_uuid")
-  assignmentUuid String?           @map("assignment_uuid")
   invoiceType    String            @map("invoice_type")
   laborHours     Decimal?          @map("labor_hours") @db.Decimal(5, 2)
   laborCost      Decimal?          @default(0) @map("labor_cost") @db.Decimal(10, 2)
   partsCost      Decimal?          @default(0) @map("parts_cost") @db.Decimal(10, 2)
   totalCost      Decimal           @map("total_cost")
   jobDate        DateTime          @map("job_date") @db.Date
-  active         Boolean           @default(true)
   createdAt      DateTime?         @default(now()) @map("created_at") @db.Timestamp(6)
+  assignmentUuid String?           @map("assignment_uuid")
+  unitUuid       String            @map("unit_uuid")
+  active         Boolean           @default(true)
+  invoiceNumber  String            @unique @map("invoice_number")
   invoiceParts   invoice_parts[]
   unitAssignment unit_assignments? @relation(fields: [assignmentUuid], references: [uuid], onDelete: NoAction, onUpdate: NoAction)
   units          units             @relation(fields: [unitUuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)
@@ -48,56 +49,51 @@ model people {
 }
 
 model electric_meters {
-  id        Int     @id @default(autoincrement())
-  uuid      String  @unique @default(uuid())
-  unitUuid  String  @map("unit_uuid")
-  meterName String  @map("meter_name")
-  active    Boolean @default(true)
-
-  units    units               @relation(fields: [unitUuid], references: [uuid], onDelete: Cascade)
-  readings electric_readings[]
-
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  id        Int                 @id @default(autoincrement())
+  uuid      String              @unique @default(uuid())
+  unitUuid  String              @map("unit_uuid")
+  meterName String              @map("meter_name")
+  active    Boolean             @default(true)
+  createdAt DateTime            @default(now()) @map("created_at") @db.Timestamp(6)
+  units     units               @relation(fields: [unitUuid], references: [uuid], onDelete: Cascade)
+  readings  electric_readings[]
 }
 
 model electricity_invoices {
-  id             Int      @id @default(autoincrement())
-  uuid           String   @unique @default(uuid())
-  unitUuid       String   @map("unit_uuid")
-  billingStart   DateTime @map("billing_start") @db.Date
-  billingEnd     DateTime @map("billing_end") @db.Date
-  totalUsage     Decimal  @map("total_usage") @db.Decimal(10, 2)
-  supplyCharge   Decimal  @map("supply_charge") @db.Decimal(10, 2)
-  deliveryCharge Decimal  @map("delivery_charge") @db.Decimal(10, 2)
-  totalCharge    Decimal  @map("total_charge") @db.Decimal(10, 2)
-  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamp(6)
-
+  id               Int                 @id @default(autoincrement())
+  uuid             String              @unique @default(uuid())
+  unitUuid         String              @map("unit_uuid")
+  billingStart     DateTime            @map("billing_start") @db.Date
+  billingEnd       DateTime            @map("billing_end") @db.Date
+  totalUsage       Decimal             @map("total_usage") @db.Decimal(10, 2)
+  supplyCharge     Decimal             @map("supply_charge") @db.Decimal(10, 2)
+  deliveryCharge   Decimal             @map("delivery_charge") @db.Decimal(10, 2)
+  totalCharge      Decimal             @map("total_charge") @db.Decimal(10, 2)
+  createdAt        DateTime            @default(now()) @map("created_at") @db.Timestamp(6)
+  electricReadings electric_readings[]
   units            units               @relation(fields: [unitUuid], references: [uuid], onDelete: Cascade)
-  electricReadings electric_readings[] // <-- New relation
 }
 
 model electric_readings {
-  id           Int      @id @default(autoincrement())
-  uuid         String   @unique @default(uuid())
-  meterUuid    String   @map("meter_uuid")
-  readingDate  DateTime @map("reading_date") @db.Date
-  readingValue Decimal  @map("reading_value") @db.Decimal(10, 2)
-  invoiceUuid  String?  @map("invoice_uuid")
-
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
-
+  id                 Int                   @id @default(autoincrement())
+  uuid               String                @unique @default(uuid())
+  meterUuid          String                @map("meter_uuid")
+  readingDate        DateTime              @map("reading_date") @db.Date
+  readingValue       Decimal               @map("reading_value") @db.Decimal(10, 2)
+  createdAt          DateTime              @default(now()) @map("created_at") @db.Timestamp(6)
+  invoiceUuid        String?               @map("invoice_uuid")
+  electricityInvoice electricity_invoices? @relation(fields: [invoiceUuid], references: [uuid])
   electricMeter      electric_meters       @relation(fields: [meterUuid], references: [uuid], onDelete: Cascade)
-  electricityInvoice electricity_invoices? @relation(fields: [invoiceUuid], references: [uuid], onDelete: SetNull)
 }
 
 model unit_assignments {
   id         Int        @id @default(autoincrement())
   uuid       String     @unique
-  unitUuid   String     @map("unit_uuid")
-  personUuid String     @map("person_uuid")
   role       Role
   active     Boolean?   @default(true)
   startDate  DateTime?  @map("start_date") @db.Date
+  personUuid String     @map("person_uuid")
+  unitUuid   String     @map("unit_uuid")
   invoices   invoices[]
   people     people     @relation(fields: [personUuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)
   units      units      @relation(fields: [unitUuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)
@@ -110,30 +106,31 @@ model units {
   affordable          Boolean                @default(false)
   active              Boolean                @default(true)
   bikeRegistrations   bike_registrations[]
-  invoices            invoices[]
-  unitAssignments     unit_assignments[]
   electricMeters      electric_meters[]
   electricityInvoices electricity_invoices[]
+  invoices            invoices[]
+  unitAssignments     unit_assignments[]
 }
 
 model parts {
   id       Int     @id @default(autoincrement())
   name     String  @unique
   unitCost Decimal @map("unit_cost") @db.Decimal(10, 2)
+  active   Boolean @default(true)
 }
 
 model bike_registrations {
   id               Int        @id @default(autoincrement())
   uuid             String     @unique
-  personUuid       String     @map("person_uuid")
-  unitUuid         String     @map("unit_uuid")
-  spotUuid         String     @map("spot_uuid")
   makeModel        String     @map("make_model")
   color            String
   registrationDate DateTime   @default(now()) @map("registration_date") @db.Timestamp(6)
   feePaidDate      DateTime   @map("fee_paid_date") @db.Timestamp(6)
   nextDueDate      DateTime   @map("next_due_date") @db.Timestamp(6)
   active           Boolean    @default(true)
+  personUuid       String     @map("person_uuid")
+  spotUuid         String     @map("spot_uuid")
+  unitUuid         String     @map("unit_uuid")
   person           people     @relation(fields: [personUuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)
   bikeSpot         bike_spots @relation(fields: [spotUuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)
   unit             units      @relation(fields: [unitUuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)

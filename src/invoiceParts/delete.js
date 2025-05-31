@@ -1,7 +1,7 @@
-import prisma from '../../db/prismaClient.js';
+import prisma from '../db/prismaClient.js';
 
-export async function deleteInvoicePart(uuid) {
-  return await prisma.invoiceParts.delete({
+export async function deleteInvoicePartByUUID(uuid) {
+  return await prisma.invoice_parts.delete({
     where: { uuid },
   });
 }
