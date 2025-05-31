@@ -141,14 +141,13 @@ model bike_registrations {
   unit             units      @relation(fields: [unitUuid], references: [uuid], onDelete: Cascade, onUpdate: NoAction)
 }
 
-model bikeSpots {
-  id                Int                 @id @default(autoincrement())
-  uuid              String              @unique
-  active            Boolean             @default(true)
-  rackPosition      rack_position       @map("rack_position")
-  bikeRegistrations bikeRegistrations[]
-
-  @@map("bike_spots")
+model bike_spots {
+  id                Int                  @id @default(autoincrement())
+  uuid              String               @unique
+  spotNumber        String               @unique @map("spot_number")
+  active            Boolean              @default(true)
+  rackPosition      rack_position        @map("rack_position")
+  bikeRegistrations bike_registrations[]
 }
 
 enum Role {

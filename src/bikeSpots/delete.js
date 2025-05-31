@@ -5,7 +5,7 @@ import prisma from '../db/prismaClient.js';
  * @param {string} spotUuid - UUID of the bike spot
  */
 export async function deleteBikeSpot(spotUuid) {
-  return await prisma.bikeSpots.delete({
+  return await prisma.bike_spots.delete({
     where: { uuid: spotUuid },
   });
 }
