@@ -118,6 +118,7 @@ model units {
 
 model parts {
   id       Int     @id @default(autoincrement())
+  uuid     String  @unique
   name     String  @unique
   unitCost Decimal @map("unit_cost") @db.Decimal(10, 2)
   active   Boolean @default(true)
