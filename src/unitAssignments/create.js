@@ -6,7 +6,7 @@ import prisma from '../db/prismaClient.js';
  * @param {Object} assignmentData - Required: personUuid, unitUuid, role
  */
 export async function createUnitAssignment(assignmentData) {
-  return await prisma.unitAssignments.create({
+  return await prisma.unit_assignments.create({
     data: {
       uuid: randomUUID(),
       ...assignmentData,
