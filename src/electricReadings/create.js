@@ -6,7 +6,7 @@ import prisma from '../db/prismaClient.js';
  * @param {Object} readingData - { meterUuid, readingDate, readingValue }
  */
 export async function createElectricReading(readingData) {
-  return await prisma.electricReadings.create({
+  return await prisma.electric_readings.create({
     data: {
       uuid: randomUUID(),
       ...readingData,
