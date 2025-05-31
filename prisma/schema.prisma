@@ -140,6 +140,7 @@ model bike_registrations {
 model bike_spots {
   id                Int                  @id @default(autoincrement())
   uuid              String               @unique
+  spotNumber        String               @unique @map("spot_number")
   active            Boolean              @default(true)
   rackPosition      rack_position        @map("rack_position")
   bikeRegistrations bike_registrations[]
