@@ -6,7 +6,7 @@ import { errorHandler } from '../db/errorHandler';
  */
 export async function getAllElectricityInvoices() {
   try {
-    return await prisma.electricityInvoices.findMany();
+    return await prisma.electricity_invoices.findMany();
   } catch (e) {
     return errorHandler(e);
   }
@@ -17,7 +17,7 @@ export async function getAllElectricityInvoices() {
  */
 export async function getElectricityInvoiceByUUID(invoiceUuid) {
   try {
-    return await prisma.electricityInvoices.findUnique({
+    return await prisma.electricity_invoices.findUnique({
       where: { uuid: invoiceUuid },
     });
   } catch (e) {
@@ -30,7 +30,7 @@ export async function getElectricityInvoiceByUUID(invoiceUuid) {
  */
 export async function getElectricityInvoicesByUnitUUID(unitUuid) {
   try {
-    return await prisma.electricityInvoices.findMany({
+    return await prisma.electricity_invoices.findMany({
       where: { unitUuid: unitUuid },
     });
   } catch (e) {
