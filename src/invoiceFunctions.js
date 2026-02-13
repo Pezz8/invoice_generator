@@ -6,6 +6,11 @@ const getPath = (unitNumber, invoice, title) =>
 
 // Function to replace placeholders in the HTML template with dynamic values
 export function replaceTemplatePlaceholders(template, data) {
+  if (!template) {
+    console.error('❌ ERROR: Template is undefined!');
+    console.log('data:', data);
+    throw new Error('Template is undefined in replaceTemplatePlaceholders');
+  }
   return template
     .replace('{{formattedToday}}', data.formattedToday)
     .replace('{{unitNumber}}', data.unitNumber)
@@ -40,6 +45,12 @@ export function getInvoiceAndPath(type, unitNumber, invoice, templates) {
       return {
         template: templates.fTemplate,
         pdfPath: getPath(unitNumber, invoice, 'HVAC Filter Invoice'),
+      };
+
+    case 'V':
+      return {
+        template: templates.vTemplate,
+        pdfPath: getPath(unitNumber, invoice, 'Vent Cleaning Invoice'),
       };
 
     default:

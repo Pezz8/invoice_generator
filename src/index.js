@@ -11,6 +11,7 @@ import {
   woTemplatePath,
   kTemplatePath,
   fTemplatePath,
+  vTemplatePath,
   sheetName,
   formattedToday,
   workOrderPath,
@@ -33,7 +34,8 @@ import { config } from 'dotenv';
 const woTemplate = readTemplate(woTemplatePath);
 const kTemplate = readTemplate(kTemplatePath);
 const fTemplate = readTemplate(fTemplatePath);
-const templates = { woTemplate, kTemplate, fTemplate };
+const vTemplate = readTemplate(vTemplatePath);
+const templates = { woTemplate, kTemplate, fTemplate, vTemplate };
 
 // Load env
 config();
