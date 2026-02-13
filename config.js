@@ -41,6 +41,7 @@ const reportPath = `/home/yourUserName/OneDrive/Documents/testing/reports/report
 export const woTemplatePath = `${__dirname}/resources/regatta_invoices_templates/work_order_temp.html`;
 export const kTemplatePath = `${__dirname}/resources/regatta_invoices_templates/key_order_temp.html`;
 export const fTemplatePath = `${__dirname}/resources/regatta_invoices_templates/filter_order_temp.html`;
+export const vTemplatePath = `${__dirname}/resources/regatta_invoices_templates/vent_order_temp.html`;
 
 // Current sheet
 // export const sheetName = moment().format("MMM YY");
