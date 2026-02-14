@@ -1,4 +1,5 @@
 import moment from 'moment';
+import { normalizeUnit } from '../utils/normalizeData.js';
 
 /**
  * Parse a single row from report.xlsx into a normalized invoice job object.
@@ -15,7 +16,7 @@ export function parseReportRow(row) {
     'Invoice Type': typeRaw,
   } = row || {};
 
-  const unitNumber = unitNumberRaw != null ? String(unitNumberRaw).trim() : '';
+  const unitNumber = normalizeUnit(unitNumberRaw);
   const invoiceNumber =
     invoiceNumberRaw != null ? String(invoiceNumberRaw).trim() : '';
   const type = typeRaw != null ? String(typeRaw).trim() : '';

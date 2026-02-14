@@ -1,4 +1,9 @@
 import { readSheetRows } from './excel.js';
+import {
+  normalizeEmail,
+  normalizeOccupantType,
+  normalizeUnit,
+} from '../utils/normalizeData.js';
 
 /**
  * Address Book loader and helpers.
@@ -9,61 +14,6 @@ import { readSheetRows } from './excel.js';
  *  - Occupant Type
  *  - Email Address
  */
-
-/**
- * Normalize a unit number to a stable lookup key.
- *
- * Notes:
- * - Keeps alphanumerics and dashes.
- * - Trims whitespace.
- * - Uppercases.
- */
-export function normalizeUnit(unitRaw) {
-  const cleaned = String(unitRaw ?? '')
-    .trim()
-    .toUpperCase()
-    .replace(/\s+/g, '')
-    .replace(/[^A-Z0-9-]/g, '');
-
-  if (!cleaned) return '';
-
-  // Handle commercial units like CU-1, CU-01, CU-10
-  const cuMatch = cleaned.match(/^CU-?(\d+)$/);
-  if (cuMatch) {
-    const num = cuMatch[1].padStart(2, '0');
-    return `CU-${num}`;
-  }
-
-  // Default: return cleaned value as-is
-  return cleaned;
-}
-
-/**
- * Normalize occupant type values (e.g., "owner", "Owner ") into canonical strings.
- * Canonical values: OWNER, MANAGER, TENANT
- */
-export function normalizeOccupantType(typeRaw) {
-  const t = String(typeRaw ?? '')
-    .trim()
-    .toUpperCase();
-  if (!t) return '';
-
-  // Common synonyms / variants
-  if (t === 'OWNER' || t === 'OWNERS') return 'OWNER';
-  if (t === 'MANAGER' || t === 'PROPERTY MANAGER' || t === 'PM')
-    return 'MANAGER';
-  if (t === 'TENANT' || t === 'RENTER' || t === 'OCCUPANT') return 'TENANT';
-
-  // Fall back to the normalized string so the caller can decide how strict to be.
-  return t;
-}
-
-/**
- * Basic email cleanup (does not fully validate).
- */
-export function normalizeEmail(emailRaw) {
-  return String(emailRaw ?? '').trim();
-}
 
 /**
  * Load an address book from an XLSX sheet and return a lookup Map:
