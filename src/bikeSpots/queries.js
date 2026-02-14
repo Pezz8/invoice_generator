@@ -4,7 +4,7 @@ import prisma from '../db/prismaClient';
 // Get all bike spots
 export async function getAllBikeSpots() {
   try {
-    return await prisma.bikeSpots.findMany();
+    return await prisma.bike_spots.findMany();
   } catch (e) {
     return errorHandler(e);
   }
@@ -13,7 +13,7 @@ export async function getAllBikeSpots() {
 // Find a bike spot by UUID
 export async function getBikeSpotByUUID(spotUuid) {
   try {
-    return await prisma.bikeSpots.findUnique({
+    return await prisma.bike_spots.findUnique({
       where: { uuid: spotUuid },
     });
   } catch (e) {
@@ -24,7 +24,7 @@ export async function getBikeSpotByUUID(spotUuid) {
 // Find a bike spot by spot number
 export async function getBikeSpotBySpotNumber(spotNumber) {
   try {
-    return await prisma.bikeSpots.findUnique({
+    return await prisma.bike_spots.findUnique({
       where: { spotNumber: spotNumber },
     });
   } catch (e) {
@@ -35,7 +35,7 @@ export async function getBikeSpotBySpotNumber(spotNumber) {
 // Get available (unassigned) bike spots
 export async function getAvailableBikeSpots() {
   try {
-    return await prisma.bikeSpots.findMany({
+    return await prisma.bike_spots.findMany({
       where: {
         bikeRegistrations: {
           none: {},

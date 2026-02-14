@@ -5,8 +5,8 @@ import prisma from '../db/prismaClient.js';
  * @param {string} spotUuid - UUID of the bike spot
  * @param {Object} updates - Fields to update
  */
-export async function updateBikeSpot(spotUuid, updates) {
-  return await prisma.bikeSpots.update({
+export async function updateBikeSpotByUUID(spotUuid, updates) {
+  return await prisma.bike_spots.update({
     where: { uuid: spotUuid },
     data: updates,
   });

@@ -6,7 +6,7 @@ import prisma from '../db/prismaClient.js';
  * @param {Object} spotData - Required: spot_number, rack_position
  */
 export async function createBikeSpot(spotData) {
-  return await prisma.bikeSpots.create({
+  return await prisma.bike_spots.create({
     data: {
       uuid: randomUUID(),
       ...spotData,

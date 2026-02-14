@@ -5,7 +5,7 @@ import prisma from '../db/prismaClient.js';
  * @param {string} bikeUuid - UUID of the bike registration
  */
 export async function softDeleteBikeRegistration(bikeUuid) {
-  return await prisma.bikeRegistrations.update({
+  return await prisma.bike_registrations.update({
     where: { uuid: bikeUuid },
     data: { active: false },
   });

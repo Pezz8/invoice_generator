@@ -6,7 +6,7 @@ import prisma from '../db/prismaClient.js';
  * @param {Object} updates - Fields to update
  */
 export async function updateBikeRegistration(bikeUuid, updates) {
-  return await prisma.bikeRegistrations.update({
+  return await prisma.bike_registrations.update({
     where: { uuid: bikeUuid },
     data: updates,
   });

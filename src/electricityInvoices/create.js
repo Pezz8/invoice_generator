@@ -6,7 +6,7 @@ import prisma from '../db/prismaClient.js';
  * @param {Object} invoiceData - { unitUuid, billingStart, billingEnd, totalUsage, supplyCharge, deliveryCharge, totalCharge }
  */
 export async function createElectricityInvoice(invoiceData) {
-  return await prisma.electricityInvoices.create({
+  return await prisma.electricity_invoices.create({
     data: {
       uuid: randomUUID(),
       ...invoiceData,

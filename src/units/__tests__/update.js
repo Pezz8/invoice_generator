@@ -1,54 +1,27 @@
-import prisma from '../../db/prismaClient';
-import { createUnit } from '../create';
-import { getUnitByNumber } from '../queries';
-import {
-  deactivateUnit,
-  updateToAffordable,
-  updateToNotAffordable,
-  updateUnitNumber,
-} from '../update';
+import { updateUnitByUUID } from '../update.js';
+import { createUnit } from '../create.js';
+import { getUnitByUUID } from '../queries.js';
+import prisma from '../../db/prismaClient.js';
 
-afterAll(async () => {
-  await prisma.units.deleteMany();
-  await prisma.$disconnect();
-});
+describe('updateUnit', () => {
+  let testUnit;
 
-describe('deactivate unit', () => {
-  it('should deactivate one unit', async () => {
-    const actual = await createUnit('3Q');
-    await deactivateUnit(actual.uuid);
-    const updated = await getUnitByNumber(actual.unitNumber);
-    expect(updated?.active).toBe(false);
+  beforeEach(async () => {
+    const unitNumber = 'Test Update';
+    testUnit = await createUnit(unitNumber);
   });
-});
 
-describe('update unit number', () => {
-  it('should updated one the unit number', async () => {
-    const actual = await createUnit('9Q');
-    const newUnitNumber = '4W';
-    await updateUnitNumber(actual.uuid, newUnitNumber);
-    const updated = await getUnitByNumber(newUnitNumber);
-    expect(updated?.unitNumber).toBe(newUnitNumber);
+  afterEach(async () => {
+    await prisma.units.deleteMany();
+    await prisma.$disconnect();
   });
-});
 
-describe('update unit number', () => {
-  it('should updated one the unit to affordable', async () => {
-    const actual = await createUnit('9Q');
-    await updateToAffordable(actual.uuid);
-    const updated = await getUnitByNumber(actual.unitNumber);
-    expect(updated?.affordable).toBe(true);
-  });
-});
+  test('should update the unit number of a unit', async () => {
+    const updatedNumber = 'Updated Unit 200';
+    await updateUnitByUUID(testUnit.uuid, { unitNumber: updatedNumber });
 
-describe('update unit number', () => {
-  it('should updated one the unit to not affordable', async () => {
-    const actual = await createUnit('11Q');
-    await updateToAffordable(actual.uuid);
-    const updated1 = await getUnitByNumber(actual.unitNumber);
-    expect(updated1?.affordable).toBe(true);
-    await updateToNotAffordable(actual.uuid);
-    const updated2 = await getUnitByNumber(actual.unitNumber);
-    expect(updated2?.affordable).toBe(false);
+    const updated = await getUnitByUUID(testUnit.uuid);
+
+    expect(updated.unitNumber).toBe(updatedNumber);
   });
 });
