@@ -19,11 +19,23 @@ import { readSheetRows } from './excel.js';
  * - Uppercases.
  */
 export function normalizeUnit(unitRaw) {
-  return String(unitRaw ?? '')
+  const cleaned = String(unitRaw ?? '')
     .trim()
     .toUpperCase()
     .replace(/\s+/g, '')
     .replace(/[^A-Z0-9-]/g, '');
+
+  if (!cleaned) return '';
+
+  // Handle commercial units like CU-1, CU-01, CU-10
+  const cuMatch = cleaned.match(/^CU-?(\d+)$/);
+  if (cuMatch) {
+    const num = cuMatch[1].padStart(2, '0');
+    return `CU-${num}`;
+  }
+
+  // Default: return cleaned value as-is
+  return cleaned;
 }
 
 /**
