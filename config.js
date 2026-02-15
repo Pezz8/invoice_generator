@@ -43,6 +43,18 @@ export const kTemplatePath = `${__dirname}/resources/regatta_invoices_templates/
 export const fTemplatePath = `${__dirname}/resources/regatta_invoices_templates/filter_order_temp.html`;
 export const vTemplatePath = `${__dirname}/resources/regatta_invoices_templates/vent_order_temp.html`;
 
+// Address Book path
+export const addressBookPath = `${__dirname}/resources/unitList.xlsx`;
+export const addressBookSheet = 'Sheet1';
+
+// Draft emails path
+export const draftEmailPath = `${__dirname}/emails`;
+
+// Email headers
+export const emailOccupantType = 'OWNER,MANAGER';
+export const emailFrom = 'Management <management@test.com>';
+export const emailSubjectPrefix = 'Unit';
+
 // Current sheet
 // export const sheetName = moment().format("MMM YY");
 export const sheetName = `${month} ${year}`;

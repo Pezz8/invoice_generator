@@ -1,5 +1,6 @@
 node_modules/
 /invoices/
+/emails/
 resources/report.xlsx
 resources/regatta_invoices_templates/
 resources/work_orders/*

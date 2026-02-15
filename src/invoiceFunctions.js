@@ -61,6 +61,26 @@ export function getInvoiceAndPath(type, unitNumber, invoice, templates) {
   }
 }
 
+// Find a PDF by invoice number inside invoices/<sheetName>/
+// Assumes invoice numbers are unique within that folder.
+export function getPathByInvoiceNumber(invoiceNumber) {
+  const folder = `${invoicePath}/${sheetName}`;
+
+  if (!fs.existsSync(folder)) return null;
+
+  const files = fs.readdirSync(folder);
+  for (const file of files) {
+    if (!file.toLowerCase().endsWith('.pdf')) continue;
+
+    // Match files that end with " <invoiceNumber>.pdf"
+    if (file.endsWith(` ${invoiceNumber}.pdf`)) {
+      return `${folder}/${file}`;
+    }
+  }
+
+  return null;
+}
+
 export async function handleExistingPDF(pdfPath, mergePath, invoiceNumber) {
   // Check if the file already exists, and skip if it does
   if (fs.existsSync(pdfPath)) {
