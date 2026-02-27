@@ -6,6 +6,7 @@ import { readSheetRows } from '../data/excel.js';
 import { parseReportRow } from '../data/reportParser.js';
 import { loadAddressBook, selectUnitRecipients } from '../data/addressBook.js';
 import { getPathByInvoiceNumber } from '../invoiceFunctions.js';
+import { sendGraphMail } from '../graph/graphMail.js';
 
 import {
   reportPath,
@@ -14,8 +15,8 @@ import {
   addressBookPath,
   addressBookSheet,
   emailOccupantType,
-  emailFrom,
   emailSubjectPrefix,
+  invEmailPath,
 } from '../../config.js';
 
 /**
@@ -34,13 +35,49 @@ export async function generateEmailDrafts({
   occupantTypes = emailOccupantType,
 
   // Email headers
-  from = emailFrom,
   subjectPrefix = emailSubjectPrefix,
 
-  // Output
+  // Mode: 'draft' | 'send'
+  mode = 'draft',
+
+  // Output (used in draft mode)
   outDir = draftEmailPath,
 } = {}) {
   await fs.mkdir(outDir, { recursive: true });
+
+  // Load email HTML template once
+  const htmlTemplate = await fs.readFile(invEmailPath, 'utf8');
+
+  // Load signature template only in send mode
+  let signatureHtml = '';
+  if (mode === 'send') {
+    // Prefer signature_temp.html (as discussed), fallback to signature.html
+    const templatesDir = path.dirname(invEmailPath);
+    try {
+      signatureHtml = await fs.readFile(
+        path.join(templatesDir, 'signature_temp.html'),
+        'utf8'
+      );
+    } catch {
+      try {
+        signatureHtml = await fs.readFile(
+          path.join(templatesDir, 'signature.html'),
+          'utf8'
+        );
+      } catch {
+        signatureHtml = '';
+      }
+    }
+  }
+
+  const formatDateList = (dates) => {
+    const clean = (dates || []).map((d) => String(d).trim()).filter(Boolean);
+    const unique = Array.from(new Set(clean));
+    if (unique.length === 0) return 'N/A';
+    if (unique.length === 1) return unique[0];
+    if (unique.length === 2) return `${unique[0]} and ${unique[1]}`;
+    return `${unique.slice(0, -1).join(', ')}, and ${unique[unique.length - 1]}`;
+  };
 
   // Load invoice rows from report
   const rows = readSheetRows(reportPath, sheetName);
@@ -62,7 +99,7 @@ export async function generateEmailDrafts({
     sheetName: addressBookSheetName,
   });
 
-  // Nodemailer as MIME builder (no sending)
+  // Draft mode uses Nodemailer as a MIME builder (no sending)
   const transporter = nodemailer.createTransport({
     streamTransport: true,
     buffer: true,
@@ -129,14 +166,69 @@ export async function generateEmailDrafts({
       subject = `${subjectPrefix} ${unitNumber} - Invoices`;
     }
 
-    const info = await transporter.sendMail({
-      from,
+    // Render HTML body from template (per unit)
+    const invoiceWord = attachments.length === 1 ? 'invoice' : 'invoices';
+    const invoiceDates = invoices
+      .map((i) => i.formattedDate ?? i.date ?? i.Date)
+      .filter(Boolean);
+    const invoiceDatesText = formatDateList(invoiceDates);
+
+    const htmlBody = htmlTemplate
+      .replaceAll('{{INVOICE_WORD}}', invoiceWord)
+      .replaceAll('{{INVOICE_DATES}}', invoiceDatesText)
+      .replaceAll('{{SIGNATURE}}', signatureHtml);
+
+    if (mode === 'send') {
+      // Graph send
+      // NOTE: Graph can embed inline images if your graphMail.js supports isInline + contentId.
+      // We pass those fields for the logo so signature cid:managementLogo can render.
+      const graphAttachments = [...attachments];
+
+      // Add logo only in send mode (contentId must match signature template: cid:managementLogo)
+      graphAttachments.push({
+        filename: 'managementLogo.png',
+        path: path.join(
+          path.dirname(invEmailPath),
+          '..',
+          'images',
+          'managementLogo.png'
+        ),
+        contentType: 'image/png',
+        isInline: true,
+        contentId: 'managementLogo',
+      });
+
+      await sendGraphMail({
+        to: Array.isArray(to) ? to : [to],
+        cc,
+        subject,
+        html: htmlBody,
+        attachments: graphAttachments,
+        saveToSentItems: true,
+      });
+
+      results.push({
+        unitNumber,
+        status: 'ok',
+        to,
+        cc,
+        attachments: attachments.length,
+        messageId: '(graph)',
+      });
+
+      continue;
+    }
+
+    // Draft mode: build MIME and write .eml
+    const mailOptions = {
       to,
       cc: cc.length ? cc : undefined,
       subject,
-      text: '', // empty body for now
-      attachments,
-    });
+      html: htmlBody,
+      attachments, // invoice PDFs only
+    };
+
+    const info = await transporter.sendMail(mailOptions);
 
     const emlFileName = `Unit_${unitNumber}_${Date.now()}.eml`;
     const outPath = path.join(outDir, emlFileName);
@@ -159,19 +251,53 @@ export async function generateEmailDrafts({
 // node src/eml/generateEmail.js
 if (import.meta.url === `file://${process.argv[1]}`) {
   try {
-    const res = await generateEmailDrafts();
+    // CLI args
+    // Examples:
+    //   node src/eml/generateEmail.js                -> draft (default)
+    //   node src/eml/generateEmail.js --mode draft   -> draft
+    //   node src/eml/generateEmail.js --mode send    -> send
+    //   node src/eml/generateEmail.js --send         -> send
+    //   node src/eml/generateEmail.js --draft        -> draft
+    const args = process.argv.slice(2);
+
+    let mode = 'draft';
+
+    if (args.includes('--send')) mode = 'send';
+    if (args.includes('--draft')) mode = 'draft';
+
+    const modeIdx = args.indexOf('--mode');
+    if (modeIdx !== -1 && args[modeIdx + 1]) {
+      mode = String(args[modeIdx + 1]).toLowerCase();
+    }
+
+    if (!['draft', 'send'].includes(mode)) {
+      throw new Error(
+        `Invalid mode: ${mode}. Use --mode draft|send (or --draft/--send).`
+      );
+    }
+
+    const res = await generateEmailDrafts({ mode });
+
     const ok = res.filter((r) => r.status === 'ok').length;
     const skipped = res.filter((r) => r.status === 'skipped').length;
     const warnings = res.filter((r) => r.status === 'warning').length;
 
     console.log(
-      `EML generation complete. ok=${ok} skipped=${skipped} warnings=${warnings}`
+      `${mode === 'send' ? 'Email send' : 'EML generation'} complete. ok=${ok} skipped=${skipped} warnings=${warnings}`
     );
     for (const r of res) {
       if (r.status === 'ok') {
-        console.log(
-          `  [OK] Unit ${r.unitNumber} -> ${r.outPath} (to=${r.to}${r.cc?.length ? ` cc=${r.cc.join(',')}` : ''}) attachments=${r.attachments}`
-        );
+        if (r.outPath) {
+          // Draft mode
+          console.log(
+            `  [OK] Unit ${r.unitNumber} -> ${r.outPath} (to=${r.to}${r.cc?.length ? ` cc=${r.cc.join(',')}` : ''}) attachments=${r.attachments}`
+          );
+        } else {
+          // Send mode
+          console.log(
+            `  [SENT] Unit ${r.unitNumber} messageId=${r.messageId} (to=${r.to}${r.cc?.length ? ` cc=${r.cc.join(',')}` : ''}) attachments=${r.attachments}`
+          );
+        }
       } else {
         console.log(
           `  [${r.status.toUpperCase()}] Unit ${r.unitNumber}: ${r.reason}`

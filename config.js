@@ -1,5 +1,6 @@
 import moment from 'moment';
 import commandLineArgs from 'command-line-args';
+import { graphSender } from './graph.private.js';
 
 const optionDefinitions = [
   {
@@ -16,7 +17,7 @@ const optionDefinitions = [
   },
 ];
 
-const options = commandLineArgs(optionDefinitions);
+const options = commandLineArgs(optionDefinitions, { partial: true });
 
 const __dirname = import.meta.dirname;
 
@@ -42,6 +43,7 @@ export const woTemplatePath = `${__dirname}/resources/regatta_invoices_templates
 export const kTemplatePath = `${__dirname}/resources/regatta_invoices_templates/key_order_temp.html`;
 export const fTemplatePath = `${__dirname}/resources/regatta_invoices_templates/filter_order_temp.html`;
 export const vTemplatePath = `${__dirname}/resources/regatta_invoices_templates/vent_order_temp.html`;
+export const invEmailPath = `${__dirname}/resources/email_templates/invoice_email_temp.html`;
 
 // Address Book path
 export const addressBookPath = `${__dirname}/resources/unitList.xlsx`;
@@ -52,8 +54,8 @@ export const draftEmailPath = `${__dirname}/emails`;
 
 // Email headers
 export const emailOccupantType = 'OWNER,MANAGER';
-export const emailFrom = 'Management <management@test.com>';
-export const emailSubjectPrefix = 'Unit';
+export const emailFrom = `Management <${graphSender}>`;
+export const emailSubjectPrefix = 'Regatta';
 
 // Current sheet
 // export const sheetName = moment().format("MMM YY");
