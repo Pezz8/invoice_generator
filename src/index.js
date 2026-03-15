@@ -1,6 +1,5 @@
 import * as xlsx from 'xlsx';
 import puppeteer from 'puppeteer';
-import moment from 'moment';
 import fs from 'fs';
 import path from 'path';
 xlsx.set_fs(fs);
@@ -21,6 +20,8 @@ import { getSheet } from './reportFunctions.js';
 
 import { handleExistingPDF } from './invoiceFunctions.js';
 
+import { parseReportRow } from './data/reportParser.js';
+
 import {
   replaceTemplatePlaceholders,
   readTemplate,
@@ -28,7 +29,7 @@ import {
   getInvoiceAndPath,
 } from './invoiceFunctions.js';
 import { mergePDFs } from './woMerger.js';
-import { config } from 'dotenv';
+// import { config } from 'dotenv';
 
 // Loading templates
 const woTemplate = readTemplate(woTemplatePath);
@@ -38,7 +39,7 @@ const vTemplate = readTemplate(vTemplatePath);
 const templates = { woTemplate, kTemplate, fTemplate, vTemplate };
 
 // Load env
-config();
+// config();
 
 // Main function
 async function generateInvoices() {
@@ -55,34 +56,11 @@ async function generateInvoices() {
   const browser = await puppeteer.launch();
 
   for (const row of rows) {
-    const {
-      'Unit Number': unitNumber,
-      'Order Date': date,
-      'Invoice Number': invoiceNumber,
-      'Parts Cost': parts,
-      'Labor Cost': labor,
-      'Invoice Type': type,
-    } = row;
+    const parsed = parseReportRow(row);
+    if (!parsed) continue;
 
-    // // Format date as MM-DD-YYYY
-    // const formattedDate = moment(date).add(1, "day").format("L");
-
-    let formattedDate;
-    if (typeof date === 'number') {
-      // Handle Excel serial date
-      formattedDate = moment(
-        new Date((date - (25567 + 1)) * 86400 * 1000)
-      ).format('L');
-    } else {
-      // If it's already a valid date, format it
-      formattedDate = moment(date).add(1, 'day').format('L');
-    }
-
-    // Ensure parts and labor are numbers, defaulting to 0 if they are not valid
-    const partsCost = parseFloat(parts) || 0;
-    const laborCost = parseFloat(labor) || 0;
-
-    const totalAmount = partsCost + laborCost;
+    const { unitNumber, invoiceNumber, type, formattedDate, totalAmount } =
+      parsed;
 
     const { template, pdfPath } = getInvoiceAndPath(
       type,

@@ -1,7 +1,12 @@
 node_modules/
 /invoices/
+/emails/
 resources/report.xlsx
+resources/unitList.xlsx
+resources/unitListR.xlsx
 resources/regatta_invoices_templates/
+resources/email_templates/signature_temp.html
+resources/images/managementLogo.png
 resources/work_orders/*
 resources/UnitListR.xlsx
 resources/unitList.xlsx
@@ -9,6 +14,7 @@ resources/unitList.xlsx
 r_index.js
 .env.development
 .env.test
+configR.js
 generated/prisma/
 generated/.DS_Store
 .DS_Store
@@ -16,3 +22,5 @@ configR.js
 graph.private.js
 signature_temp.html
 managementLogo.png
+
+
