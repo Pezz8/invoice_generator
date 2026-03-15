@@ -22,6 +22,8 @@ import { handleExistingPDF } from './invoiceFunctions.js';
 
 import { parseReportRow } from './data/reportParser.js';
 
+import { checkExcelFileSafe } from './utils/fileSafety.js';
+
 import {
   replaceTemplatePlaceholders,
   readTemplate,
@@ -44,6 +46,7 @@ const templates = { woTemplate, kTemplate, fTemplate, vTemplate };
 // Main function
 async function generateInvoices() {
   // Read or create the workbook
+  checkExcelFileSafe(reportPath, 'Report workbook');
   const workbook = xlsx.readFile(reportPath);
 
   // Get or create the target sheet

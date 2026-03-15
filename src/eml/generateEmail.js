@@ -8,6 +8,7 @@ import { loadReportWorkbook } from '../data/reportWorkbook.js';
 import { loadAddressBook, selectUnitRecipients } from '../data/addressBook.js';
 import { getPathByInvoiceNumber } from '../invoiceFunctions.js';
 import { sendGraphMail } from '../graph/graphMail.js';
+import { checkExcelFileSafe } from '../utils/fileSafety.js';
 
 import {
   reportPath,
@@ -45,6 +46,10 @@ export async function generateEmailDrafts({
   outDir = draftEmailPath,
 } = {}) {
   await fs.mkdir(outDir, { recursive: true });
+
+  // Ensure Excel files are safe to read (not missing or open in Excel)
+  checkExcelFileSafe(reportPath, 'Report workbook');
+  checkExcelFileSafe(addressBookFilePath, 'Address Book workbook');
 
   // Load email HTML template once
   const htmlTemplate = await fs.readFile(invEmailPath, 'utf8');
