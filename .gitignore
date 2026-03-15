@@ -11,6 +11,7 @@ resources/work_orders/*
 r_index.js
 .env.development
 .env.test
+configR.js
 generated/prisma/
 generated/.DS_Store
 .DS_Store

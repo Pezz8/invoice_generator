@@ -29,6 +29,7 @@ const year = options.year || currentDate.format('YY'); // Default to current yea
 // Mac OneDrive directory path
 // export const invoicePath = `/Users/yourUserName/Library/CloudStorage/OneDrive-Personal/Documents/invoice_generator/invoices/`;
 // export const reportPath = `/Users/yourUserName/Library/CloudStorage/OneDrive-Personal/Documents/invoice_generator/reports/report.xlsx`;
+
 /* Local directory path*/
 export const invoicePath = `${__dirname}/invoices`;
 export const reportPath = `${__dirname}/resources/report.xlsx`;
@@ -39,10 +40,10 @@ const invoicePath = `/home/yourUserName/OneDrive/Documents/testing/invoices/`;
 const reportPath = `/home/yourUserName/OneDrive/Documents/testing/reports/report.xlsx`;*/
 
 // Templates path
-export const woTemplatePath = `${__dirname}/resources/regatta_invoices_templates/work_order_temp.html`;
-export const kTemplatePath = `${__dirname}/resources/regatta_invoices_templates/key_order_temp.html`;
-export const fTemplatePath = `${__dirname}/resources/regatta_invoices_templates/filter_order_temp.html`;
-export const vTemplatePath = `${__dirname}/resources/regatta_invoices_templates/vent_order_temp.html`;
+export const woTemplatePath = `${__dirname}/resources/invoices_templates/work_order_temp.html`;
+export const kTemplatePath = `${__dirname}/resources/invoices_templates/key_order_temp.html`;
+export const fTemplatePath = `${__dirname}/resources/invoices_templates/filter_order_temp.html`;
+export const vTemplatePath = `${__dirname}/resources/invoices_templates/vent_order_temp.html`;
 export const invEmailPath = `${__dirname}/resources/email_templates/invoice_email_temp.html`;
 
 // Address Book path
@@ -60,5 +61,6 @@ export const emailSubjectPrefix = 'Regatta';
 // Current sheet
 // export const sheetName = moment().format("MMM YY");
 export const sheetName = `${month} ${year}`;
+export const sheetYearFolder = `20${year}`;
 // Current date in MMMM Do YYYY format
 export const formattedToday = moment().format('MMMM Do YYYY');

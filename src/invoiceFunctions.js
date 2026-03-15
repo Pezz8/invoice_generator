@@ -1,8 +1,13 @@
 import fs from 'fs';
-import { invoicePath, sheetName, workOrderPath } from '../config.js';
+import {
+  invoicePath,
+  sheetName,
+  sheetYearFolder,
+  workOrderPath,
+} from '../config.js';
 
 const getPath = (unitNumber, invoice, title) =>
-  `${invoicePath}/${sheetName}/Regatta ${unitNumber} ${title} ${invoice}.pdf`;
+  `${invoicePath}/${sheetYearFolder}/${sheetName}/Regatta ${unitNumber} ${title} ${invoice}.pdf`;
 
 // Function to replace placeholders in the HTML template with dynamic values
 export function replaceTemplatePlaceholders(template, data) {
@@ -27,7 +32,9 @@ export function readTemplate(templatePath) {
 
 // Make a new directory based on current month and year in MMM YY format
 export function invoiceDirectory() {
-  return fs.promises.mkdir(`${invoicePath}/${sheetName}`, { recursive: true });
+  return fs.promises.mkdir(`${invoicePath}/${sheetYearFolder}/${sheetName}`, {
+    recursive: true,
+  });
 }
 
 // Generate full invoice path
@@ -61,10 +68,10 @@ export function getInvoiceAndPath(type, unitNumber, invoice, templates) {
   }
 }
 
-// Find a PDF by invoice number inside invoices/<sheetName>/
+// Find a PDF by invoice number inside invoices/<sheetYearFolder>/<sheetName>/
 // Assumes invoice numbers are unique within that folder.
 export function getPathByInvoiceNumber(invoiceNumber) {
-  const folder = `${invoicePath}/${sheetName}`;
+  const folder = `${invoicePath}/${sheetYearFolder}/${sheetName}`;
 
   if (!fs.existsSync(folder)) return null;
 

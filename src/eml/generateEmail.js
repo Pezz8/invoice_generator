@@ -4,6 +4,7 @@ import nodemailer from 'nodemailer';
 
 import { readSheetRows } from '../data/excel.js';
 import { parseReportRow } from '../data/reportParser.js';
+import { loadReportWorkbook } from '../data/reportWorkbook.js';
 import { loadAddressBook, selectUnitRecipients } from '../data/addressBook.js';
 import { getPathByInvoiceNumber } from '../invoiceFunctions.js';
 import { sendGraphMail } from '../graph/graphMail.js';
@@ -79,22 +80,8 @@ export async function generateEmailDrafts({
     return `${unique.slice(0, -1).join(', ')}, and ${unique[unique.length - 1]}`;
   };
 
-  // Load invoice rows from report
-  const rows = readSheetRows(reportPath, sheetName);
-
-  // Parse + group by unit
-  const invoicesByUnit = new Map();
-  for (const row of rows) {
-    const parsed = parseReportRow(row);
-    if (!parsed) continue;
-
-    const arr = invoicesByUnit.get(parsed.unitNumber);
-    if (arr) arr.push(parsed);
-    else invoicesByUnit.set(parsed.unitNumber, [parsed]);
-  }
-
-  // Load address book
-  const addressBook = loadAddressBook({
+  // Load address book (recipients)
+  const addressBook = await loadAddressBook({
     filePath: addressBookFilePath,
     sheetName: addressBookSheetName,
   });
@@ -108,12 +95,67 @@ export async function generateEmailDrafts({
 
   const results = [];
 
-  for (const [unitNumber, invoices] of invoicesByUnit.entries()) {
+  // Load invoice rows from report
+  // - Draft mode: read-only
+  // - Send mode: read with row metadata (for stamping) and ensure "Email Sent" column exists in-memory
+  let reportWb = null;
+  let reportRows = [];
+
+  if (mode === 'send') {
+    reportWb = loadReportWorkbook({ reportPath, sheetName });
+    const metaRows = reportWb.readRows(); // [{ excelRowNumber, row, emailSent }]
+    reportRows = metaRows;
+  } else {
+    reportRows = readSheetRows(reportPath, sheetName).map((row) => ({
+      excelRowNumber: null,
+      row,
+      emailSent: '',
+    }));
+  }
+
+  // Parse + group by unit
+  const invoicesByUnit = new Map();
+  for (const mr of reportRows) {
+    const parsed = parseReportRow(mr.row);
+    if (!parsed) continue;
+
+    // Attach metadata for send-mode stamping/skip
+    parsed._excelRowNumber = mr.excelRowNumber;
+    parsed._emailSent = mr.emailSent;
+
+    const arr = invoicesByUnit.get(parsed.unitNumber);
+    if (arr) arr.push(parsed);
+    else invoicesByUnit.set(parsed.unitNumber, [parsed]);
+  }
+
+  let stampedAny = false;
+
+  for (const [unitNumber, allInvoices] of invoicesByUnit.entries()) {
+    const invoices =
+      mode === 'send'
+        ? allInvoices.filter((i) => {
+            const value = String(i._emailSent || '').trim();
+            // Ignore 'manual send' values, regardless of whitespace/case
+            if (value.replace(/\s+/g, '').toLowerCase() === 'manualsend')
+              return false;
+            return !value;
+          })
+        : allInvoices;
+
+    if (mode === 'send' && invoices.length === 0) {
+      results.push({
+        unitNumber,
+        status: 'skipped',
+        reason: 'Already sent (Email Sent is stamped in report.xlsx)',
+      });
+      continue;
+    }
+
     const { to, cc } = selectUnitRecipients(addressBook, unitNumber, {
       types: occupantTypes,
     });
 
-    if (!to) {
+    if (!to || (Array.isArray(to) && to.length === 0)) {
       results.push({
         unitNumber,
         status: 'skipped',
@@ -123,7 +165,10 @@ export async function generateEmailDrafts({
     }
 
     // Build attachments: one per invoice (lookup by invoice number only)
+    // In send mode, also track which Excel rows should be stamped after a successful send.
     const attachments = [];
+    const excelRowsToStamp = [];
+
     for (const inv of invoices) {
       const { invoiceNumber } = inv;
 
@@ -141,6 +186,10 @@ export async function generateEmailDrafts({
         filename: path.basename(pdfPath),
         path: pdfPath,
       });
+
+      if (mode === 'send' && inv._excelRowNumber) {
+        excelRowsToStamp.push(inv._excelRowNumber);
+      }
     }
 
     if (!attachments.length) {
@@ -152,18 +201,42 @@ export async function generateEmailDrafts({
       continue;
     }
 
-    // Subject line: keep simple but informative
+    // Subject line
+    // Desired format examples:
+    //   Single:   Regatta 111 - Work Order Invoice 1111
+    //   Multiple: Regatta 111 - Invoices
     let subject;
+
+    const firstFilename = path.basename(attachments[0].path);
+    const firstNameWithoutExt = firstFilename.replace(/\.pdf$/i, '').trim();
+
+    const escapeRegExp = (s) =>
+      String(s).replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
+
+    // Extract:
+    //   unitLabel = {prefix before unitNumber}{unitNumber}
+    //   remainder = {text after unitNumber}
+    // Works for filenames like:
+    //   "Regatta 111 Work Order Invoice 1111"
+    //   "Regatta 111 - Work Order Invoice 1111"
+    const unitNum = String(unitNumber).trim();
+    const re = new RegExp(`^(.*?\\b)(${escapeRegExp(unitNum)})(\\b.*)$`, 'i');
+    const m = firstNameWithoutExt.match(re);
+
+    const rawPrefix = m ? (m[1] || '').trim() : '';
+    const matchedUnit = m ? m[2] || unitNum : unitNum;
+    let remainder = m ? (m[3] || '').trim() : '';
+
+    // If remainder begins with a dash (common in some filenames), strip it.
+    remainder = remainder.replace(/^[-–—]\s*/, '').trim();
+
+    const unitLabel = rawPrefix ? `${rawPrefix} ${matchedUnit}` : matchedUnit;
+
     if (attachments.length === 1) {
-      const filename = path.basename(attachments[0].path);
-      const nameWithoutExt = filename.replace(/\.pdf$/i, '');
-      const subjectLabel = nameWithoutExt.replace(
-        new RegExp(`^Unit\\s+${unitNumber}\\s+`),
-        ''
-      );
-      subject = `${subjectPrefix} ${unitNumber} - ${subjectLabel}`;
+      // If we can't derive a remainder, fall back to the full filename without extension.
+      subject = remainder ? `${unitLabel} - ${remainder}` : firstNameWithoutExt;
     } else {
-      subject = `${subjectPrefix} ${unitNumber} - Invoices`;
+      subject = `${unitLabel} - Invoices`;
     }
 
     // Render HTML body from template (per unit)
@@ -207,6 +280,15 @@ export async function generateEmailDrafts({
         saveToSentItems: true,
       });
 
+      // Stamp "Email Sent" for the rows that were actually included in this email
+      if (reportWb && excelRowsToStamp.length) {
+        const iso = new Date().toISOString();
+        reportWb.stampEmailSent(excelRowsToStamp, iso);
+        // Save after each successful unit send to prevent duplicate sends on interruption
+        reportWb.save();
+        stampedAny = true;
+      }
+
       results.push({
         unitNumber,
         status: 'ok',
@@ -230,7 +312,15 @@ export async function generateEmailDrafts({
 
     const info = await transporter.sendMail(mailOptions);
 
-    const emlFileName = `Unit_${unitNumber}_${Date.now()}.eml`;
+    // Use subject-based filename for drafts (sanitized for filesystem)
+    const sanitizeFileName = (name) =>
+      String(name)
+        .replace(/[\\/:*?"<>|]/g, '-')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+    const safeBaseName = sanitizeFileName(subject);
+    const emlFileName = `${safeBaseName}_${Date.now()}.eml`;
     const outPath = path.join(outDir, emlFileName);
     await fs.writeFile(outPath, info.message);
 
@@ -242,6 +332,10 @@ export async function generateEmailDrafts({
       cc,
       attachments: attachments.length,
     });
+  }
+
+  if (mode === 'send' && reportWb && stampedAny) {
+    reportWb.save();
   }
 
   return results;
