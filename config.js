@@ -50,6 +50,10 @@ export const invEmailPath = `${__dirname}/resources/email_templates/invoice_emai
 export const addressBookPath = `${__dirname}/resources/unitList.xlsx`;
 export const addressBookSheet = 'Sheet1';
 
+// Parts Catalog path
+export const partsCatalogPath = `${__dirname}/resources/Parts Catalog.xlsx`;
+export const partsCatalogSheet = 'Sheet1';
+
 // Draft emails path
 export const draftEmailPath = `${__dirname}/emails`;
 

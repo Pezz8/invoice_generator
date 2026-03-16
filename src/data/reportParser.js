@@ -13,6 +13,7 @@ export function parseReportRow(row) {
     'Invoice Number': invoiceNumberRaw,
     'Parts Cost': partsRaw,
     'Labor Cost': laborRaw,
+    'Parts Used': partsUsedRaw,
     'Invoice Type': typeRaw,
   } = row || {};
 
@@ -40,6 +41,7 @@ export function parseReportRow(row) {
     partsCost,
     laborCost,
     totalAmount,
+    partsUsedRaw,
   };
 }
 
