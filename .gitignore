@@ -7,6 +7,7 @@ resources/unitList.xlsx
 resources/unitListR.xlsx
 resources/unitList.xlsx
 resources/unitListR.xlsx
+resources/Regatta Parts Catalog.xlsx
 resources/regatta_invoices_templates/
 resources/email_templates/signature_temp.html
 resources/images/managementLogo.png
@@ -15,7 +16,6 @@ resources/images/managementLogo.png
 resources/work_orders/*
 resources/UnitListR.xlsx
 resources/unitList.xlsx
-
 r_index.js
 .env.development
 .env.test
