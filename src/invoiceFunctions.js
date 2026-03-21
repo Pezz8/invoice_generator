@@ -22,7 +22,8 @@ export function replaceTemplatePlaceholders(template, data) {
     .replace('{{date}}', data.date)
     .replace('{{invoiceNumber}}', data.invoiceNumber)
     .replace('{{totalAmount}}', data.totalAmount)
-    .replace('{{title}}', data.fileName);
+    .replace('{{title}}', data.fileName)
+    .replace('{{PARTS_SECTION}}', data.partsSectionHtml || '');
 }
 
 // Function to read the HTML template

@@ -22,6 +22,10 @@ import { handleExistingPDF } from './invoiceFunctions.js';
 
 import { parseReportRow } from './data/reportParser.js';
 
+import { loadPartsCatalog } from './data/partsCatalog.js';
+import { parsePartsUsed } from './data/partsCatalogParser.js';
+import { buildPartsRows } from './data/partsRowBuilder.js';
+
 import { checkExcelFileSafe } from './utils/fileSafety.js';
 
 import {
@@ -40,6 +44,45 @@ const fTemplate = readTemplate(fTemplatePath);
 const vTemplate = readTemplate(vTemplatePath);
 const templates = { woTemplate, kTemplate, fTemplate, vTemplate };
 
+function buildPartsSectionHtml(partsRows = []) {
+  if (!partsRows.length) {
+    return '';
+  }
+
+  const rowsHtml = partsRows
+    .map(
+      (row) => `
+        <tr>
+          <td>${row.code}</td>
+          <td>${row.name}</td>
+          <td>${row.qty}</td>
+          <td>$${Number(row.unitPrice).toFixed(2)}</td>
+          <td>$${Number(row.lineTotal).toFixed(2)}</td>
+        </tr>
+      `
+    )
+    .join('');
+
+  return `
+    <div class="parts-section">
+      <table>
+        <thead>
+          <tr>
+            <th>Part Code</th>
+            <th>Description</th>
+            <th>Qty</th>
+            <th>Unit Price</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rowsHtml}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
 // Load env
 // config();
 
@@ -55,6 +98,9 @@ async function generateInvoices() {
   // Convert sheet data to JSON for processing
   const rows = xlsx.utils.sheet_to_json(worksheet);
 
+  // Load parts catalog (used for itemized parts in invoices)
+  const partsByCode = loadPartsCatalog();
+
   // Launch Puppeteer once for all invoices
   const browser = await puppeteer.launch();
 
@@ -62,8 +108,18 @@ async function generateInvoices() {
     const parsed = parseReportRow(row);
     if (!parsed) continue;
 
+    // Parse and build parts rows if "Parts Used" is present
+    let partsRows = [];
+    if (parsed?.partsUsedRaw) {
+      const parsedParts = parsePartsUsed(parsed.partsUsedRaw);
+      const partsResult = buildPartsRows(parsedParts, partsByCode);
+      partsRows = partsResult.rows;
+    }
+
     const { unitNumber, invoiceNumber, type, formattedDate, totalAmount } =
       parsed;
+
+    const partsSectionHtml = buildPartsSectionHtml(partsRows);
 
     const { template, pdfPath } = getInvoiceAndPath(
       type,
@@ -80,6 +136,7 @@ async function generateInvoices() {
       invoiceNumber,
       totalAmount,
       fileName,
+      partsSectionHtml,
     });
 
     if (
