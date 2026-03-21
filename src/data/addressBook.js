@@ -76,15 +76,16 @@ export function getOccupantsForUnit(addressBookMap, unitNumber) {
  * Select recipients for a unit.
  *
  * types:
- *  - 'ALL' to include every occupant type
+ *  - 'ALL' to include OWNER and MANAGER only
  *  - or an array like ['OWNER'] or ['OWNER','MANAGER']
  *
  * Returns:
  *  - { to: string|null, cc: string[], occupants: Array<...> }
  *
- * Default behavior for now (per your decision):
- *  - First email becomes `to`
- *  - Remaining emails become `cc`
+ * Default behavior:
+ *  - First OWNER email becomes `to` when an owner exists
+ *  - All remaining matching emails become `cc`
+ *  - If no owner exists, the first matching email becomes `to`
  */
 export function selectUnitRecipients(
   addressBookMap,
@@ -97,7 +98,7 @@ export function selectUnitRecipients(
   const wanted = Array.isArray(types)
     ? new Set(types.map((t) => normalizeOccupantType(t)))
     : String(types).trim().toUpperCase() === 'ALL'
-      ? null
+      ? new Set(['OWNER', 'MANAGER'])
       : new Set(
           String(types)
             .split(',')
@@ -105,13 +106,12 @@ export function selectUnitRecipients(
             .filter(Boolean)
         );
 
-  const filtered = wanted
-    ? occupants.filter((o) => wanted.has(normalizeOccupantType(o.occupantType)))
-    : occupants;
+  const filtered = occupants.filter((o) =>
+    wanted.has(normalizeOccupantType(o.occupantType))
+  );
 
   // Deduplicate emails (keep first occurrence)
   const seen = new Set();
-  const emails = [];
   const keptOccupants = [];
   for (const o of filtered) {
     const e = normalizeEmail(o.email);
@@ -119,12 +119,26 @@ export function selectUnitRecipients(
     const key = e.toLowerCase();
     if (seen.has(key)) continue;
     seen.add(key);
-    emails.push(e);
-    keptOccupants.push(o);
+    keptOccupants.push({ ...o, email: e });
   }
 
-  if (!emails.length) return { to: null, cc: [], occupants: [] };
+  if (!keptOccupants.length) return { to: null, cc: [], occupants: [] };
 
-  const [to, ...cc] = emails;
-  return { to, cc, occupants: keptOccupants };
+  const owners = keptOccupants.filter(
+    (o) => normalizeOccupantType(o.occupantType) === 'OWNER'
+  );
+  const nonOwners = keptOccupants.filter(
+    (o) => normalizeOccupantType(o.occupantType) !== 'OWNER'
+  );
+
+  const orderedOccupants = owners.length
+    ? [...owners, ...nonOwners]
+    : keptOccupants;
+  const [primaryRecipient, ...ccRecipients] = orderedOccupants;
+
+  return {
+    to: primaryRecipient?.email ?? null,
+    cc: ccRecipients.map((o) => o.email),
+    occupants: orderedOccupants,
+  };
 }
