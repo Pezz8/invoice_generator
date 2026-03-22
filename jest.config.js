@@ -1,5 +1,5 @@
 export default {
-  setupFiles: ['./test/setupEnv.js'],
+  setupFiles: ['./tests/setup/dbTestUtils.js'],
   transform: {},
   testEnvironment: 'node',
   moduleNameMapper: {
