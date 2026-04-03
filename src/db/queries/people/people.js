@@ -1,15 +1,15 @@
 import pool from '../../client.js';
 
 export async function create(data) {
-  const { firstName, middleName = null, lastName, email = null } = data ?? {};
+  const { fullName, email = null } = data ?? {};
 
   const result = await pool.query(
     `
-      INSERT INTO people (first_name, middle_name, last_name, email)
-      VALUES ($1, $2, $3, $4)
+      INSERT INTO people (full_name, email)
+      VALUES ($1, $2)
       RETURNING *
     `,
-    [firstName, middleName, lastName, email]
+    [fullName, email]
   );
 
   return result.rows[0];
@@ -33,7 +33,7 @@ export async function getAll() {
     `
       SELECT *
       FROM people
-      ORDER BY last_name ASC, first_name ASC, middle_name ASC NULLS LAST
+      ORDER BY full_name ASC
     `
   );
 
@@ -45,19 +45,9 @@ export async function update(id, updates = {}) {
   const values = [];
   let index = 1;
 
-  if (updates.firstName !== undefined) {
-    fields.push(`first_name = $${index++}`);
-    values.push(updates.firstName);
-  }
-
-  if (updates.middleName !== undefined) {
-    fields.push(`middle_name = $${index++}`);
-    values.push(updates.middleName);
-  }
-
-  if (updates.lastName !== undefined) {
-    fields.push(`last_name = $${index++}`);
-    values.push(updates.lastName);
+  if (updates.fullName !== undefined) {
+    fields.push(`full_name = $${index++}`);
+    values.push(updates.fullName);
   }
 
   if (updates.email !== undefined) {
