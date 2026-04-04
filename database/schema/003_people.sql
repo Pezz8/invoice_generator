@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS people (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     full_name TEXT NOT NULL,
     email TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

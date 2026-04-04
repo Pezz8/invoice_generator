@@ -1,15 +1,17 @@
 import pool from '../../client.js';
+import { v7 as uuidv7 } from 'uuid';
 
 export async function create(data) {
   const { fullName, email = null } = data ?? {};
+  const id = uuidv7();
 
   const result = await pool.query(
     `
-      INSERT INTO people (full_name, email)
-      VALUES ($1, $2)
+      INSERT INTO people (id, full_name, email)
+      VALUES ($1, $2, $3)
       RETURNING *
     `,
-    [fullName, email]
+    [id, fullName, email]
   );
 
   return result.rows[0];

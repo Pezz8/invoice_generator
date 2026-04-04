@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS unit_people (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     unit_id UUID NOT NULL REFERENCES units(id) ON DELETE CASCADE,
     person_id UUID NOT NULL REFERENCES people(id) ON DELETE CASCADE,
     occupant_type TEXT NOT NULL CHECK (
