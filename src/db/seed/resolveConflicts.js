@@ -15,6 +15,11 @@ const CONFLICTS_PATH = path.resolve(
   'database/seed/import-conflicts.json'
 );
 
+const RESOLUTIONS_PATH = path.resolve(
+  PROJECT_ROOT,
+  'database/seed/conflict-resolutions.json'
+);
+
 async function createRelationshipSafe({ unitId, personId, occupantType }) {
   try {
     return await createUnitPeople({
@@ -40,6 +45,18 @@ function loadConflicts() {
 
 function saveConflicts(conflicts) {
   fs.writeFileSync(CONFLICTS_PATH, JSON.stringify(conflicts, null, 2));
+}
+
+function loadResolutions() {
+  if (!fs.existsSync(RESOLUTIONS_PATH)) {
+    return [];
+  }
+
+  return JSON.parse(fs.readFileSync(RESOLUTIONS_PATH, 'utf8'));
+}
+
+function saveResolutions(resolutions) {
+  fs.writeFileSync(RESOLUTIONS_PATH, JSON.stringify(resolutions, null, 2));
 }
 
 function printConflict(conflict, index, total) {
@@ -151,7 +168,33 @@ async function resolveOneConflict(conflict, rl) {
       }
 
       await pool.query('COMMIT');
-      return { resolved: true, quit: false };
+      return {
+        resolved: true,
+        quit: false,
+        resolution: {
+          resolvedAt: new Date().toISOString(),
+          unitNumber: conflict.unitNumber,
+          occupantType: conflict.occupantType,
+          incoming: {
+            fullName: conflict.incoming.fullName,
+            email: conflict.incoming.email ?? null,
+          },
+          selectedMatch: {
+            id: chosen.id,
+            fullNameBefore: chosen.fullName,
+            email: chosen.email ?? null,
+          },
+          decision: {
+            nameAction: renameToIncoming
+              ? 'USED_INCOMING_NAME'
+              : 'KEPT_EXISTING_NAME',
+            finalFullName: renameToIncoming
+              ? conflict.incoming.fullName
+              : chosen.fullName,
+            relationshipCreated: Boolean(relationship),
+          },
+        },
+      };
     } catch (err) {
       await pool.query('ROLLBACK');
       console.error('Failed to resolve conflict:', err.message);
@@ -162,6 +205,7 @@ async function resolveOneConflict(conflict, rl) {
 
 async function run() {
   const conflicts = loadConflicts();
+  const resolutions = loadResolutions();
 
   if (!conflicts.length) {
     console.log('No conflicts found.');
@@ -187,6 +231,9 @@ async function run() {
 
       if (result.resolved) {
         resolvedCount++;
+        if (result.resolution) {
+          resolutions.push(result.resolution);
+        }
       } else {
         remaining.push(conflict);
       }
@@ -196,11 +243,13 @@ async function run() {
   }
 
   saveConflicts(remaining);
+  saveResolutions(resolutions);
 
   console.log('\n--- RESOLUTION SUMMARY ---');
   console.log(`Resolved: ${resolvedCount}`);
   console.log(`Remaining: ${remaining.length}`);
   console.log(`Conflict file: ${CONFLICTS_PATH}`);
+  console.log(`Resolution report: ${RESOLUTIONS_PATH}`);
 
   await pool.end();
 }

@@ -17,6 +17,7 @@ resources/images/managementLogo.png
 resources/work_orders/*
 resources/UnitListR.xlsx
 resources/unitList.xlsx
+database/seed/
 r_index.js
 .env.development
 .env.test
